@@ -63,7 +63,7 @@ This is a comprehensive web-based application for wireless and mobile network ca
 
 1. **Clone or download the project**
    ```bash
-   git clone [<repository-url>](https://github.com/MOQ2/Network-Maker-Assistance.git)
+   git clone https://github.com/MOQ2/Network-Maker-Assistance.git
    cd wireless-network-design
    ```
 
