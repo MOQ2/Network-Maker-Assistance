@@ -63,7 +63,7 @@ This is a comprehensive web-based application for wireless and mobile network ca
 
 1. **Clone or download the project**
    ```bash
-   git clone <repository-url>
+   git clone [<repository-url>](https://github.com/MOQ2/Network-Maker-Assistance.git)
    cd wireless-network-design
    ```
 
@@ -175,7 +175,4 @@ This tool is designed for:
 - Update UI styling in template files
 - Add new calculation scenarios by extending the `WirelessNetworkCalculator` class
 
-## 📄 License
-
-This project is developed for educational purposes as part of the ENCS5323 course at Birzeit University.
 
