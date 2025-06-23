@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}OFDM Systems{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="text-center text-white mb-4">
+            <h1><i class="fas fa-chart-line me-2"></i>OFDM Systems Analysis</h1>
+            <p class="lead">Calculate data rates for OFDM components and spectral efficiency</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4><i class="fas fa-cogs me-2"></i>OFDM Parameters</h4>
+            </div>
+            <div class="card-body">
+                <form id="calculationForm">
+                    <!-- Basic OFDM Parameters -->
+                    <div class="parameter-section">
+                        <h5><i class="fas fa-wave-square me-2"></i>Basic Parameters</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Subcarrier Spacing (Hz)</label>
+                                <input type="number" class="form-control" id="subcarrier_spacing" value="15000" step="any">
+                                <small class="form-text text-muted">Frequency separation between subcarriers</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Cyclic Prefix Ratio</label>
+                                <input type="number" class="form-control" id="cyclic_prefix_ratio" value="0.25" step="0.01" min="0" max="1">
+                                <small class="form-text text-muted">CP duration as fraction of symbol duration</small>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Symbol Duration (μs)</label>
+                                <input type="number" class="form-control" id="symbol_duration" value="66.67" step="any">
+                                <small class="form-text text-muted">Leave 0 for auto-calculation from subcarrier spacing</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">System Bandwidth (MHz)</label>
+                                <input type="number" class="form-control" id="bandwidth" value="20" step="any">
+                                <small class="form-text text-muted">Total system bandwidth</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modulation and Coding -->
+                    <div class="parameter-section">
+                        <h5><i class="fas fa-code me-2"></i>Modulation & Coding</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Modulation Order</label>
+                                <select class="form-select" id="modulation_order">
+                                    <option value="2">BPSK (2)</option>
+                                    <option value="4" selected>QPSK (4)</option>
+                                    <option value="16">16-QAM (16)</option>
+                                    <option value="64">64-QAM (64)</option>
+                                    <option value="256">256-QAM (256)</option>
+                                </select>
+                                <small class="form-text text-muted">Constellation size</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Coding Rate</label>
+                                <select class="form-select" id="coding_rate">
+                                    <option value="0.33">1/3</option>
+                                    <option value="0.5" selected>1/2</option>
+                                    <option value="0.67">2/3</option>
+                                    <option value="0.75">3/4</option>
+                                    <option value="0.8">4/5</option>
+                                </select>
+                                <small class="form-text text-muted">Channel coding rate</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resource Structure -->
+                    <div class="parameter-section">
+                        <h5><i class="fas fa-th me-2"></i>Resource Structure</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Subcarriers per Resource Block</label>
+                                <input type="number" class="form-control" id="num_subcarriers_per_rb" value="12" min="1">
+                                <small class="form-text text-muted">LTE standard: 12 subcarriers</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Symbols per Resource Block</label>
+                                <input type="number" class="form-control" id="num_symbols_per_rb" value="14" min="1">
+                                <small class="form-text text-muted">LTE slot: 14 symbols</small>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Number of Parallel Resource Blocks</label>
+                                <input type="number" class="form-control" id="num_parallel_rb" value="100" min="1">
+                                <small class="form-text text-muted">20 MHz LTE: ~100 RBs</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-calculate btn-lg" id="calculateBtn">
+                            <i class="fas fa-calculator me-2"></i>Calculate OFDM Rates
+                            <div class="spinner-border spinner-border-sm ms-2 loading-spinner" role="status"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card bg-light">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle me-2"></i>OFDM Formulas</h5>
+            </div>
+            <div class="card-body">
+                <div class="formula-box">
+                    <strong>Key Calculations:</strong><br><br>
+                    
+                    <strong>Symbol Duration:</strong><br>
+                    T<sub>s</sub> = 1 / Δf<br>
+                    T<sub>total</sub> = T<sub>s</sub> × (1 + CP)<br><br>
+                    
+                    <strong>Bits per Symbol:</strong><br>
+                    b = log₂(M)<br>
+                    where M = modulation order<br><br>
+                    
+                    <strong>RE Data Rate:</strong><br>
+                    R<sub>RE</sub> = (b × R<sub>code</sub>) / T<sub>total</sub><br><br>
+                    
+                    <strong>RB Data Rate:</strong><br>
+                    R<sub>RB</sub> = R<sub>RE</sub> × N<sub>sc</sub> × N<sub>sym</sub><br><br>
+                    
+                    <strong>Spectral Efficiency:</strong><br>
+                    η = R<sub>total</sub> / B<sub>total</sub> (bits/s/Hz)
+                </div>
+                
+                <div class="mt-3">
+                    <h6>LTE Examples:</h6>
+                    <small>
+                        • 15 kHz subcarrier spacing<br>
+                        • 66.67 μs symbol duration<br>
+                        • 7.14% cyclic prefix (normal)<br>
+                        • 12 subcarriers per RB<br>
+                        • 14 symbols per slot
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div id="results" style="display: none;"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('calculationForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    showLoading('calculateBtn');
+    
+    const formData = {
+        subcarrier_spacing: parseFloat(document.getElementById('subcarrier_spacing').value),
+        symbol_duration: parseFloat(document.getElementById('symbol_duration').value) / 1e6, // Convert μs to s
+        cyclic_prefix_ratio: parseFloat(document.getElementById('cyclic_prefix_ratio').value),
+        modulation_order: parseInt(document.getElementById('modulation_order').value),
+        coding_rate: parseFloat(document.getElementById('coding_rate').value),
+        num_subcarriers_per_rb: parseInt(document.getElementById('num_subcarriers_per_rb').value),
+        num_symbols_per_rb: parseInt(document.getElementById('num_symbols_per_rb').value),
+        num_parallel_rb: parseInt(document.getElementById('num_parallel_rb').value),
+        bandwidth: parseFloat(document.getElementById('bandwidth').value) * 1e6 // Convert MHz to Hz
+    };
+    
+    try {
+        const response = await fetch('/calculate/ofdm_systems', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            displayResults(result.results, result.explanation);
+        } else {
+            displayError(result.error);
+        }
+    } catch (error) {
+        displayError('Network error: ' + error.message);
+    } finally {
+        hideLoading('calculateBtn');
+    }
+});
+</script>
+{% endblock %}

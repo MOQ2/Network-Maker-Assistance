@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AI-Powered Wireless Network Design{% endblock %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        .result-card {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+        .formula-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .explanation-box {
+            background: #ffffff;
+            border: 1px solid #e1e5e9;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 24px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+        }
+        
+        /* Clean AI Content Styling - Conversation Style */
+        .ai-content {
+            line-height: 1.7;
+            font-size: 15px;
+            color: #374151;
+            max-width: none;
+        }
+        
+        .ai-content h1,
+        .ai-content h2,
+        .ai-content h3,
+        .ai-content h4 {
+            color: #1f2937;
+            font-weight: 600;
+            margin: 24px 0 12px 0;
+            line-height: 1.3;
+        }
+        
+        .ai-content h1 { font-size: 24px; }
+        .ai-content h2 { font-size: 20px; }
+        .ai-content h3 { font-size: 18px; }
+        .ai-content h4 { font-size: 16px; }
+        
+        .ai-content p {
+            margin: 16px 0;
+            line-height: 1.7;
+        }
+        
+        .ai-content ul,
+        .ai-content ol {
+            margin: 16px 0;
+            padding-left: 24px;
+        }
+        
+        .ai-content li {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+        
+        .ai-content strong {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .ai-content em {
+            font-style: italic;
+            color: #6b7280;
+        }
+        
+        .ai-content code {
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: 'SF Mono', 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            color: #1f2937;
+        }
+        
+        .ai-content blockquote {
+            border-left: 3px solid #e5e7eb;
+            margin: 16px 0;
+            padding-left: 16px;
+            color: #6b7280;
+            font-style: italic;
+        }
+        
+        /* Technical badges - minimal and clean */
+        .tech-badge {
+            display: inline-block;
+            background: #f3f4f6;
+            color: #374151;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            margin: 0 2px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .loading-spinner {
+            display: none;
+        }
+        .btn-calculate {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border: none;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-calculate:hover {
+            background: linear-gradient(45deg, #218838, #1ea085);
+            color: white;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .parameter-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .ai-chat-container {
+            background: #ffffff;
+            border: 1px solid #e1e5e9;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 24px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .ai-question-input {
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            padding: 12px 16px;
+            background: white;
+            font-size: 15px;
+        }
+        .ai-question-input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            outline: none;
+        }
+        .conversation-history {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            border: 1px solid #e5e7eb;
+        }
+        .user-question {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            padding: 16px;
+            margin: 12px 0;
+            border-radius: 8px;
+            border-left: 3px solid #3b82f6;
+        }
+        .ai-answer {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            padding: 16px;
+            margin: 12px 0;
+            border-radius: 8px;
+            border-left: 3px solid #10b981;
+        }
+        .tech-badge-primary { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+        .tech-badge-success { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
+        .tech-badge-warning { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+        .tech-badge-info { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
+    </style>
+</head>
+<body class="gradient-bg">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-signal me-2"></i>
+                Wireless Network Design Tool
+                <span class="gemini-badge ms-2">Powered by Gemini AI</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Scenarios
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/scenario/1">Wireless Communication</a></li>
+                            <li><a class="dropdown-item" href="/scenario/2">OFDM Systems</a></li>
+                            <li><a class="dropdown-item" href="/scenario/3">Link Budget</a></li>
+                            <li><a class="dropdown-item" href="/scenario/4">Cellular Design</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p>&copy; 2025 Birzeit University - Faculty of Engineering and Technology</p>
+            <p>Department of Electrical and Computer Engineering - ENCS5323</p>
+            <small class="text-muted">
+                <span class="gemini-badge">Powered by Google Gemini AI</span>
+                - Advanced AI explanations and interactive Q&A
+            </small>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables for AI chat
+        let currentScenario = '';
+        let currentParameters = {};
+        let currentResults = {};
+        let conversationHistory = [];
+
+        // Common JavaScript functions
+        function showLoading(buttonId) {
+            document.getElementById(buttonId).disabled = true;
+            document.querySelector('.loading-spinner').style.display = 'inline-block';
+        }
+
+        function hideLoading(buttonId) {
+            document.getElementById(buttonId).disabled = false;
+            document.querySelector('.loading-spinner').style.display = 'none';
+        }
+
+        function displayResults(results, explanation) {
+            const resultsDiv = document.getElementById('results');
+            let html = '<div class="result-card"><h4><i class="fas fa-chart-line me-2"></i>Calculation Results</h4>';
+            
+            for (const [key, value] of Object.entries(results)) {
+                const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                let formattedValue = value;
+                
+                if (typeof value === 'number') {
+                    if (value > 1000000) {
+                        formattedValue = (value / 1000000).toFixed(2) + ' M';
+                    } else if (value > 1000) {
+                        formattedValue = (value / 1000).toFixed(2) + ' k';
+                    } else {
+                        formattedValue = value.toFixed(4);
+                    }
+                }
+                
+                html += `<div class="row mb-2">
+                    <div class="col-sm-6"><strong>${formattedKey}:</strong></div>
+                    <div class="col-sm-6">${formattedValue}</div>
+                </div>`;
+            }
+            
+            html += '</div>';
+            
+            if (explanation) {
+                html += `<div class="explanation-box">
+                    <h5><i class="fas fa-robot me-2 text-primary"></i>Gemini AI Explanation</h5>
+                    <div class="ai-content">${formatAIContent(explanation)}</div>
+                </div>`;
+            }
+
+            // Add AI Chat Interface
+            html += createAIChatInterface();
+            
+            resultsDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+            
+            // Initialize AI chat after results are displayed
+            initializeAIChat();
+        }
+
+        function formatAIContent(content) {
+            // Clean, minimal formatting like Claude/ChatGPT
+            let formatted = content
+                // Remove markdown indicators that were showing as raw text
+                .replace(/```markdown\s*/g, '')
+                .replace(/```\s*/g, '')
+                .replace(/^\s*markdown\s*/gm, '')
+                
+                // Clean headers - simple and minimal
+                .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+                .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+                .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+                .replace(/^#### (.*$)/gm, '<h4>$1</h4>')
+                
+                // Text formatting - keep it simple
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                
+                // Code - minimal styling
+                .replace(/`([^`\n]+)`/g, '<code>$1</code>')
+                
+                // Lists - clean bullet points
+                .replace(/^\* (.*$)/gm, '<li>$1</li>')
+                .replace(/^- (.*$)/gm, '<li>$1</li>')
+                
+                // Only highlight key technical terms with minimal badges
+                .replace(/\b(dBm)\b/g, '<span class="tech-badge tech-badge-primary">$1</span>')
+                .replace(/\b(dBi|dB)\b/g, '<span class="tech-badge tech-badge-primary">$1</span>')
+                .replace(/\b(MHz|GHz|Hz)\b/g, '<span class="tech-badge tech-badge-success">$1</span>')
+                .replace(/\b(km²|km|m)\b/g, '<span class="tech-badge tech-badge-info">$1</span>')
+                .replace(/\b(Erlang|EIRP|FSPL|RSS)\b/g, '<span class="tech-badge tech-badge-warning">$1</span>')
+                
+                // Convert line breaks to paragraphs
+                .replace(/\n\s*\n/g, '</p><p>')
+                .replace(/\n/g, ' ')
+                
+                // Wrap lists properly
+                .replace(/(<li>.*?<\/li>)/gs, function(match) {
+                    return '<ul>' + match + '</ul>';
+                })
+                
+                // Clean up multiple consecutive list tags
+                .replace(/<\/ul>\s*<ul>/g, '')
+                
+                // Wrap content in paragraphs
+                .replace(/^(?!<[hul])/gm, '<p>')
+                .replace(/(?<!>)$/gm, '</p>')
+                
+                // Clean up empty paragraphs and formatting issues
+                .replace(/<p>\s*<\/p>/g, '')
+                .replace(/<p>(<[hul])/g, '$1')
+                .replace(/(<\/[hul]>)<\/p>/g, '$1')
+                .replace(/<p>\s*(<\/)/g, '$1')
+                
+                // Final cleanup
+                .replace(/\s+/g, ' ')
+                .replace(/>\s+</g, '><')
+                .trim();
+                
+            // Add proper CSS classes for styling
+            formatted = '<div class="tech-badge-primary { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; } .tech-badge-success { background: #dcfce7; color: #166534; border-color: #bbf7d0; } .tech-badge-warning { background: #fef3c7; color: #92400e; border-color: #fde68a; } .tech-badge-info { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; }">' + formatted + '</div>';
+                
+            return formatted;
+        }
+
+        function createAIChatInterface() {
+            return `
+                <div class="ai-chat-container">
+                    <h5><i class="fas fa-comments me-2 text-success"></i>Ask Gemini AI about these results</h5>
+                    <p class="text-muted mb-3">Get detailed explanations, comparisons, and optimization suggestions from our AI assistant.</p>
+                    
+                    <div class="conversation-history" id="conversationHistory" style="display: none;">
+                        <!-- Conversation history will be populated here -->
+                    </div>
+                    
+                    <div class="input-group mt-3">
+                        <input type="text" class="form-control ai-question-input" id="aiQuestionInput" 
+                               placeholder="Ask a question about these results... (e.g., Why is the path loss so high?)" 
+                               onkeypress="handleQuestionKeypress(event)">
+                        <button class="btn btn-success btn-lg" id="askAIBtn" onclick="askAI()">
+                            <i class="fas fa-paper-plane me-1"></i>Ask AI
+                            <div class="spinner-border spinner-border-sm ms-2 d-none" id="aiLoadingSpinner"></div>
+                        </button>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-lightbulb me-1 text-warning"></i>
+                            <strong>Try asking:</strong> "How can I improve this link?", "What happens if I double the distance?", "Explain the path loss formula", "Compare this to typical systems"
+                        </small>
+                    </div>
+                </div>
+            `;
+        }
+
+        function initializeAIChat() {
+            conversationHistory = [];
+            const historyDiv = document.getElementById('conversationHistory');
+            if (historyDiv) {
+                historyDiv.style.display = 'none';
+                historyDiv.innerHTML = '';
+            }
+        }
+
+        function handleQuestionKeypress(event) {
+            if (event.key === 'Enter') {
+                askAI();
+            }
+        }
+
+        async function askAI() {
+            const questionInput = document.getElementById('aiQuestionInput');
+            const question = questionInput.value.trim();
+            
+            if (!question) {
+                alert('Please enter a question');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('askAIBtn').disabled = true;
+            document.getElementById('aiLoadingSpinner').classList.remove('d-none');
+
+            try {
+                const response = await fetch('/api/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        scenario: currentScenario,
+                        parameters: currentParameters,
+                        results: currentResults,
+                        question: question,
+                        conversation_history: conversationHistory
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    conversationHistory.push({
+                        question: question,
+                        answer: result.answer,
+                        timestamp: new Date().toLocaleTimeString()
+                    });
+
+                    updateConversationHistory();
+                    questionInput.value = '';
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Network error: ' + error.message);
+            } finally {
+                document.getElementById('askAIBtn').disabled = false;
+                document.getElementById('aiLoadingSpinner').classList.add('d-none');
+            }
+        }
+
+        function updateConversationHistory() {
+            const historyDiv = document.getElementById('conversationHistory');
+            if (!historyDiv) return;
+
+            let html = '';
+            conversationHistory.forEach((item, index) => {
+                html += `
+                    <div class="user-question">
+                        <strong><i class="fas fa-user me-2 text-primary"></i>You:</strong> ${item.question}
+                        <small class="text-muted ms-2 float-end">${item.timestamp}</small>
+                    </div>
+                    <div class="ai-answer">
+                        <strong><i class="fas fa-robot me-2 text-success"></i>Gemini AI:</strong> 
+                        <div class="ai-content mt-2">${formatAIContent(item.answer)}</div>
+                    </div>
+                `;
+            });
+
+            historyDiv.innerHTML = html;
+            historyDiv.style.display = 'block';
+            
+            // Scroll to bottom
+            historyDiv.scrollTop = historyDiv.scrollHeight;
+        }
+
+        function displayError(error) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Error:</strong> ${error}
+                </div>
+            `;
+            resultsDiv.style.display = 'block';
+        }
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Cellular System Design{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="text-center text-white mb-4">
+            <h1><i class="fas fa-network-wired me-2"></i>Cellular System Design</h1>
+            <p class="lead">Design cellular networks with coverage and capacity analysis</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h4><i class="fas fa-cogs me-2"></i>System Design Parameters</h4>
+            </div>
+            <div class="card-body">
+                <form id="calculationForm">
+                    <!-- Coverage Parameters -->
+                    <div class="parameter-section">
+                        <h5><i class="fas fa-map me-2"></i>Coverage Design</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Total Coverage Area (km²)</label>
+                                <input type="number" class="form-control" id="coverage_area_km2" value="100" step="any" min="0">
+                                <small class="form-text text-muted">Total area to be covered by the network</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Cell Radius (km)</label>
+                                <input type="number" class="form-control" id="cell_radius_km" value="1" step="any" min="0">
+                                <small class="form-text text-muted">Radius of each hexagonal cell</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Frequency Planning -->
+                    <div class="parameter-section">
+                        <h5><i class="fas fa-wave-square me-2"></i>Frequency Planning</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Frequency Reuse Factor</label>
+                                <select class="form-select" id="frequency_reuse_factor">
+                                    <option value="3">3 (High capacity)</option>
+                                    <option value="4">4</option>
+                                    <option value="7" selected>7 (Standard)</option>
+                                    <option value="12">12 (High quality)</option>
+                                </select>
+                                <small class="form-text text-muted">Number of cells before frequency reuse</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Total Spectrum (MHz)</label>
+                                <input type="number" class="form-control" id="total_spectrum_mhz" value="25" step="any" min="0">
+                                <small class="form-text text-muted">Total available spectrum for the system</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Traffic Engineering -->
+                    <div class="parameter-section">
+                        <h5><i class="fas fa-users me-2"></i>Traffic Engineering</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Users per Cell</label>
+                                <input type="number" class="form-control" id="users_per_cell" value="1000" min="1">
+                                <small class="form-text text-muted">Number of subscribers per cell</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Traffic per User (Erlang)</label>
+                                <input type="number" class="form-control" id="traffic_per_user_erlang" value="0.025" step="0.001" min="0">
+                                <small class="form-text text-muted">Average traffic intensity per user (0.025 = 90 seconds/hour)</small>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Blocking Probability (%)</label>
+                                <input type="number" class="form-control" id="blocking_probability" value="2" step="0.1" min="0" max="100">
+                                <small class="form-text text-muted">Acceptable call blocking percentage</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Sectorization</label>
+                                <select class="form-select" id="sectorization">
+                                    <option value="1" selected>Omni-directional (1 sector)</option>
+                                    <option value="3">3-sector</option>
+                                    <option value="6">6-sector</option>
+                                </select>
+                                <small class="form-text text-muted">Sectors per cell site</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-calculate btn-lg" id="calculateBtn">
+                            <i class="fas fa-calculator me-2"></i>Design Cellular System
+                            <div class="spinner-border spinner-border-sm ms-2 loading-spinner" role="status"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card bg-light">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle me-2"></i>Design Formulas</h5>
+            </div>
+            <div class="card-body">
+                <div class="formula-box">
+                    <strong>Cell Coverage:</strong><br>
+                    A<sub>cell</sub> = 2.6 × R² (hexagonal)<br>
+                    N<sub>cells</sub> = A<sub>total</sub> / A<sub>cell</sub><br><br>
+                    
+                    <strong>Frequency Planning:</strong><br>
+                    BW<sub>cell</sub> = BW<sub>total</sub> / N<sub>reuse</sub><br><br>
+                    
+                    <strong>Traffic Engineering (Erlang B):</strong><br>
+                    A<sub>total</sub> = N<sub>users</sub> × A<sub>user</sub><br>
+                    C ≈ A + C₀√A (approximation)<br><br>
+                    
+                    <strong>System Capacity:</strong><br>
+                    Users<sub>total</sub> = N<sub>cells</sub> × Users<sub>cell</sub><br>
+                    Efficiency = Channels / MHz
+                </div>
+                
+                <div class="mt-3">
+                    <h6>Typical Traffic Values:</h6>
+                    <small>
+                        • Residential: 0.02-0.03 Erlang<br>
+                        • Business: 0.05-0.1 Erlang<br>
+                        • Busy hour: 0.1-0.15 Erlang<br>
+                        • Blocking: 1-5%<br>
+                        • Cell radius: 0.5-35 km
+                    </small>
+                </div>
+                
+                <div class="mt-3">
+                    <h6>Reuse Patterns:</h6>
+                    <small>
+                        • N=3: Higher capacity, more interference<br>
+                        • N=7: Balanced performance<br>
+                        • N=12: Better quality, lower capacity
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div id="results" style="display: none;"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('calculationForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    showLoading('calculateBtn');
+    
+    const formData = {
+        coverage_area_km2: parseFloat(document.getElementById('coverage_area_km2').value),
+        cell_radius_km: parseFloat(document.getElementById('cell_radius_km').value),
+        frequency_reuse_factor: parseInt(document.getElementById('frequency_reuse_factor').value),
+        total_spectrum_mhz: parseFloat(document.getElementById('total_spectrum_mhz').value),
+        users_per_cell: parseInt(document.getElementById('users_per_cell').value),
+        traffic_per_user_erlang: parseFloat(document.getElementById('traffic_per_user_erlang').value),
+        blocking_probability: parseFloat(document.getElementById('blocking_probability').value) / 100,
+        sectorization: parseInt(document.getElementById('sectorization').value)
+    };
+    
+    try {
+        const response = await fetch('/calculate/cellular_design', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            displayResults(result.results, result.explanation);
+        } else {
+            displayError(result.error);
+        }
+    } catch (error) {
+        displayError('Network error: ' + error.message);
+    } finally {
+        hideLoading('calculateBtn');
+    }
+});
+</script>
+{% endblock %}

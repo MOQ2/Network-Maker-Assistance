@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}AI-Powered Wireless Network Design - Home{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="text-center text-white mb-5">
+            <h1 class="display-4 fw-bold mb-3">
+                <i class="fas fa-broadcast-tower me-3"></i>
+                AI-Powered Wireless Network Design
+            </h1>
+            <p class="lead">Advanced calculations and AI explanations for wireless and mobile network scenarios</p>
+            <p class="text-light">Birzeit University - ENCS5323 Project</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Scenario 1: Wireless Communication System -->
+    <div class="col-lg-6 col-md-12">
+        <div class="card card-hover h-100">
+            <div class="card-body text-center p-4">
+                <div class="mb-3">
+                    <i class="fas fa-wave-square fa-3x text-primary"></i>
+                </div>
+                <h4 class="card-title text-primary">Wireless Communication System</h4>
+                <p class="card-text">
+                    Calculate data rates through the complete communication chain: sampler, quantizer, 
+                    source encoder, channel encoder, interleaver, and burst formatting.
+                </p>
+                <div class="formula-box mb-3">
+                    <strong>Key Formulas:</strong><br>
+                    • Quantizer Rate = f<sub>s</sub> × log₂(L)<br>
+                    • Channel Encoder Rate = R<sub>source</sub> / R<sub>code</sub><br>
+                    • Burst Rate = R<sub>interleaver</sub> × (1 + overhead)
+                </div>
+                <a href="/scenario/1" class="btn btn-primary btn-lg">
+                    <i class="fas fa-calculator me-2"></i>Start Calculation
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scenario 2: OFDM Systems -->
+    <div class="col-lg-6 col-md-12">
+        <div class="card card-hover h-100">
+            <div class="card-body text-center p-4">
+                <div class="mb-3">
+                    <i class="fas fa-chart-line fa-3x text-success"></i>
+                </div>
+                <h4 class="card-title text-success">OFDM Systems</h4>
+                <p class="card-text">
+                    Analyze OFDM performance including resource elements, symbols, blocks, 
+                    maximum capacity, and spectral efficiency calculations.
+                </p>
+                <div class="formula-box mb-3">
+                    <strong>Key Formulas:</strong><br>
+                    • RE Rate = (bits/symbol × R<sub>code</sub>) / T<sub>symbol</sub><br>
+                    • Spectral Efficiency = Total Rate / Bandwidth<br>
+                    • T<sub>total</sub> = T<sub>symbol</sub> × (1 + CP ratio)
+                </div>
+                <a href="/scenario/2" class="btn btn-success btn-lg">
+                    <i class="fas fa-signal me-2"></i>Start Calculation
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scenario 3: Link Budget -->
+    <div class="col-lg-6 col-md-12">
+        <div class="card card-hover h-100">
+            <div class="card-body text-center p-4">
+                <div class="mb-3">
+                    <i class="fas fa-satellite-dish fa-3x text-warning"></i>
+                </div>
+                <h4 class="card-title text-warning">Link Budget Calculation</h4>
+                <p class="card-text">
+                    Compute transmitted power, path loss, and received signal strength 
+                    for flat environment radio links with detailed analysis.
+                </p>
+                <div class="formula-box mb-3">
+                    <strong>Key Formulas:</strong><br>
+                    • FSPL = 32.45 + 20log₁₀(f) + 20log₁₀(d)<br>
+                    • EIRP = P<sub>tx</sub> + G<sub>tx</sub> - L<sub>cable</sub><br>
+                    • RSS = EIRP - FSPL + G<sub>rx</sub> - L<sub>misc</sub>
+                </div>
+                <a href="/scenario/3" class="btn btn-warning btn-lg text-dark">
+                    <i class="fas fa-ruler me-2"></i>Start Calculation
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scenario 4: Cellular System Design -->
+    <div class="col-lg-6 col-md-12">
+        <div class="card card-hover h-100">
+            <div class="card-body text-center p-4">
+                <div class="mb-3">
+                    <i class="fas fa-network-wired fa-3x text-danger"></i>
+                </div>
+                <h4 class="card-title text-danger">Cellular System Design</h4>
+                <p class="card-text">
+                    Design cellular networks with coverage planning, frequency reuse, 
+                    traffic engineering, and capacity optimization analysis.
+                </p>
+                <div class="formula-box mb-3">
+                    <strong>Key Formulas:</strong><br>
+                    • Cell Area = 2.6 × R²<br>
+                    • Channels ≈ Traffic + C₀√Traffic<br>
+                    • Spectrum/Cell = Total Spectrum / Reuse Factor
+                </div>
+                <a href="/scenario/4" class="btn btn-danger btn-lg">
+                    <i class="fas fa-project-diagram me-2"></i>Start Calculation
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card bg-white">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-4">
+                    <i class="fas fa-robot me-2"></i>AI-Powered Features
+                </h2>
+                <div class="row g-4">
+                    <div class="col-md-4 text-center">
+                        <i class="fas fa-brain fa-2x text-primary mb-3"></i>
+                        <h5>Intelligent Calculations</h5>
+                        <p>Advanced algorithms compute complex wireless network parameters with high precision.</p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <i class="fas fa-comments fa-2x text-success mb-3"></i>
+                        <h5>Natural Language Explanations</h5>
+                        <p>AI-powered explanations break down complex results into understandable insights.</p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <i class="fas fa-chart-bar fa-2x text-warning mb-3"></i>
+                        <h5>Visual Results</h5>
+                        <p>Interactive displays and detailed breakdowns of all calculation steps and results.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- About Section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card bg-dark text-white">
+            <div class="card-body p-4">
+                <h3><i class="fas fa-info-circle me-2"></i>About This Project</h3>
+                <p class="mb-0">
+                    This web application was developed for the Wireless and Mobile Networks course (ENCS5323) 
+                    at Birzeit University. It integrates artificial intelligence to provide comprehensive 
+                    analysis and explanations for four key wireless network design scenarios, making complex 
+                    engineering calculations accessible and educational.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
