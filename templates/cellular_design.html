@@ -6,8 +6,8 @@
 <div class="row">
     <div class="col-12">
         <div class="text-center text-white mb-4">
-            <h1><i class="fas fa-network-wired me-2"></i>Cellular System Design</h1>
-            <p class="lead">Design cellular networks with coverage and capacity analysis</p>
+            <h1><i class="fas fa-broadcast-tower me-2"></i>Advanced Cellular System Design</h1>
+            <p class="lead">Design cellular networks with link budget, interference analysis, and traffic engineering</p>
         </div>
     </div>
 </div>
@@ -16,86 +16,115 @@
     <div class="col-lg-8">
         <div class="card">
             <div class="card-header bg-danger text-white">
-                <h4><i class="fas fa-cogs me-2"></i>System Design Parameters</h4>
+                <h4><i class="fas fa-cogs me-2"></i>Advanced System Design Parameters</h4>
             </div>
             <div class="card-body">
                 <form id="calculationForm">
-                    <!-- Coverage Parameters -->
+                    <!-- System Configuration -->
                     <div class="parameter-section">
-                        <h5><i class="fas fa-map me-2"></i>Coverage Design</h5>
+                        <h5><i class="fas fa-cogs me-2"></i>System Configuration</h5>
                         <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Time Slots per Carrier</label>
+                                <input type="number" class="form-control" id="time_slots_per_carrier" value="8" min="1" max="16">
+                                <small class="form-text text-muted">GSM standard: 8, TDMA systems vary</small>
+                            </div>
                             <div class="col-md-6">
                                 <label class="form-label">Total Coverage Area (km²)</label>
-                                <input type="number" class="form-control" id="coverage_area_km2" value="100" step="any" min="0">
-                                <small class="form-text text-muted">Total area to be covered by the network</small>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Cell Radius (km)</label>
-                                <input type="number" class="form-control" id="cell_radius_km" value="1" step="any" min="0">
-                                <small class="form-text text-muted">Radius of each hexagonal cell</small>
+                                <input type="number" class="form-control" id="total_area" value="100" step="0.1" min="1">
+                                <small class="form-text text-muted">Area to be covered by the cellular system</small>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Frequency Planning -->
+                    <!-- User and Traffic Parameters -->
                     <div class="parameter-section">
-                        <h5><i class="fas fa-wave-square me-2"></i>Frequency Planning</h5>
+                        <h5><i class="fas fa-users me-2"></i>User and Traffic Parameters</h5>
                         <div class="row">
-                            <div class="col-md-6">
-                                <label class="form-label">Frequency Reuse Factor</label>
-                                <select class="form-select" id="frequency_reuse_factor">
-                                    <option value="3">3 (High capacity)</option>
-                                    <option value="4">4</option>
-                                    <option value="7" selected>7 (Standard)</option>
-                                    <option value="12">12 (High quality)</option>
-                                </select>
-                                <small class="form-text text-muted">Number of cells before frequency reuse</small>
+                            <div class="col-md-4">
+                                <label class="form-label">Maximum Number of Users</label>
+                                <input type="number" class="form-control" id="max_num_users" value="10000" min="1">
+                                <small class="form-text text-muted">Total subscribers in the system</small>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Total Spectrum (MHz)</label>
-                                <input type="number" class="form-control" id="total_spectrum_mhz" value="25" step="any" min="0">
-                                <small class="form-text text-muted">Total available spectrum for the system</small>
+                            <div class="col-md-4">
+                                <label class="form-label">Average Call Duration (seconds)</label>
+                                <input type="number" class="form-control" id="avg_call_duration" value="120" min="1" step="1">
+                                <small class="form-text text-muted">Typical: 120-180 seconds</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Calls per User per Day</label>
+                                <input type="number" class="form-control" id="avg_call_rate_per_user" value="2" min="0.1" step="0.1">
+                                <small class="form-text text-muted">Average daily call frequency</small>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Traffic Engineering -->
+                    <!-- Quality of Service -->
                     <div class="parameter-section">
-                        <h5><i class="fas fa-users me-2"></i>Traffic Engineering</h5>
+                        <h5><i class="fas fa-chart-line me-2"></i>Quality of Service</h5>
                         <div class="row">
                             <div class="col-md-6">
-                                <label class="form-label">Users per Cell</label>
-                                <input type="number" class="form-control" id="users_per_cell" value="1000" min="1">
-                                <small class="form-text text-muted">Number of subscribers per cell</small>
+                                <label class="form-label">Grade of Service (Blocking Probability)</label>
+                                <input type="number" class="form-control" id="gos" value="0.02" min="0.001" max="0.1" step="0.001">
+                                <small class="form-text text-muted">Typical: 0.01-0.05 (1-5%), Current: 0.02 (2%)</small>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Traffic per User (Erlang)</label>
-                                <input type="number" class="form-control" id="traffic_per_user_erlang" value="0.025" step="0.001" min="0">
-                                <small class="form-text text-muted">Average traffic intensity per user (0.025 = 90 seconds/hour)</small>
+                                <label class="form-label">Signal-to-Interference Ratio (dB)</label>
+                                <input type="number" class="form-control" id="sir_db" value="18" min="10" max="30" step="0.1">
+                                <small class="form-text text-muted">Required SIR for acceptable quality</small>
                             </div>
                         </div>
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Blocking Probability (%)</label>
-                                <input type="number" class="form-control" id="blocking_probability" value="2" step="0.1" min="0" max="100">
-                                <small class="form-text text-muted">Acceptable call blocking percentage</small>
+                    </div>
+
+                    <!-- Link Budget Parameters -->
+                    <div class="parameter-section">
+                        <h5><i class="fas fa-signal me-2"></i>Link Budget Parameters</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">Base Station Transmit Power (dBm)</label>
+                                <input type="number" class="form-control" id="p0_dbm" value="30" min="0" max="50" step="0.1">
+                                <small class="form-text text-muted">Typical: 20-40 dBm</small>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Sectorization</label>
-                                <select class="form-select" id="sectorization">
-                                    <option value="1" selected>Omni-directional (1 sector)</option>
-                                    <option value="3">3-sector</option>
-                                    <option value="6">6-sector</option>
+                            <div class="col-md-4">
+                                <label class="form-label">Receiver Sensitivity (dBm)</label>
+                                <input type="number" class="form-control" id="receiver_sensitivity_dbm" value="-95" min="-120" max="-70" step="0.1">
+                                <small class="form-text text-muted">Mobile station sensitivity</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Reference Distance (m)</label>
+                                <input type="number" class="form-control" id="d0_m" value="1000" min="100" max="10000" step="100">
+                                <small class="form-text text-muted">Path loss measurement reference</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Propagation Environment -->
+                    <div class="parameter-section">
+                        <h5><i class="fas fa-mountain me-2"></i>Propagation Environment</h5>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label class="form-label">Path Loss Exponent</label>
+                                <select class="form-select" id="path_loss_exponent">
+                                    <option value="2">2.0 - Free Space</option>
+                                    <option value="2.5">2.5 - Rural/Suburban</option>
+                                    <option value="3">3.0 - Urban</option>
+                                    <option value="3.5">3.5 - Dense Urban</option>
+                                    <option value="4" selected>4.0 - Urban with Obstacles</option>
+                                    <option value="4.5">4.5 - Dense Urban/Indoor</option>
+                                    <option value="5">5.0 - Heavy Urban</option>
                                 </select>
-                                <small class="form-text text-muted">Sectors per cell site</small>
+                                <small class="form-text text-muted">Environment affects propagation characteristics</small>
                             </div>
                         </div>
                     </div>
 
                     <div class="text-center mt-4">
                         <button type="submit" class="btn btn-calculate btn-lg" id="calculateBtn">
-                            <i class="fas fa-calculator me-2"></i>Design Cellular System
+                            <i class="fas fa-calculator me-2"></i>Design Advanced Cellular System
                             <div class="spinner-border spinner-border-sm ms-2 loading-spinner" role="status"></div>
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-lg ms-2" id="resetBtn">
+                            <i class="fas fa-undo me-2"></i>Reset to Defaults
                         </button>
                     </div>
                 </form>
@@ -106,44 +135,85 @@
     <div class="col-lg-4">
         <div class="card bg-light">
             <div class="card-header">
-                <h5><i class="fas fa-info-circle me-2"></i>Design Formulas</h5>
+                <h5><i class="fas fa-info-circle me-2"></i>Advanced Design Formulas</h5>
             </div>
             <div class="card-body">
                 <div class="formula-box">
-                    <strong>Cell Coverage:</strong><br>
-                    A<sub>cell</sub> = 2.6 × R² (hexagonal)<br>
-                    N<sub>cells</sub> = A<sub>total</sub> / A<sub>cell</sub><br><br>
+                    <strong>Link Budget:</strong><br>
+                    d<sub>max</sub> = ((P<sub>sens</sub>/P<sub>0</sub>)<sup>-1/n</sup>) × d<sub>0</sub><br>
+                    Cell Area = (3√3/2) × d<sub>max</sub>²<br><br>
                     
-                    <strong>Frequency Planning:</strong><br>
-                    BW<sub>cell</sub> = BW<sub>total</sub> / N<sub>reuse</sub><br><br>
+                    <strong>Traffic Engineering:</strong><br>
+                    A<sub>user</sub> = (calls/day × duration) / 86400<br>
+                    A<sub>system</sub> = A<sub>user</sub> × N<sub>users</sub><br>
+                    A<sub>cell</sub> = A<sub>system</sub> / N<sub>cells</sub><br><br>
                     
-                    <strong>Traffic Engineering (Erlang B):</strong><br>
-                    A<sub>total</sub> = N<sub>users</sub> × A<sub>user</sub><br>
-                    C ≈ A + C₀√A (approximation)<br><br>
+                    <strong>Interference Analysis:</strong><br>
+                    N ≥ (SIR × N<sub>B</sub>)<sup>2/n</sup> / 3<br>
+                    N<sub>B</sub> = 6 (first tier interferers)<br><br>
                     
-                    <strong>System Capacity:</strong><br>
-                    Users<sub>total</sub> = N<sub>cells</sub> × Users<sub>cell</sub><br>
-                    Efficiency = Channels / MHz
+                    <strong>Channel Assignment:</strong><br>
+                    Channels from Erlang B table<br>
+                    Carriers = ⌈Channels / Time_Slots⌉<br>
+                    System Carriers = Carriers × N
                 </div>
                 
                 <div class="mt-3">
-                    <h6>Typical Traffic Values:</h6>
+                    <h6>Typical Values:</h6>
                     <small>
-                        • Residential: 0.02-0.03 Erlang<br>
-                        • Business: 0.05-0.1 Erlang<br>
-                        • Busy hour: 0.1-0.15 Erlang<br>
-                        • Blocking: 1-5%<br>
-                        • Cell radius: 0.5-35 km
+                        • Traffic/User: 20-50 mErlang<br>
+                        • Call Duration: 120-180 sec<br>
+                        • Calls/Day: 1-5 calls<br>
+                        • GOS: 1-5% blocking<br>
+                        • SIR: 15-25 dB<br>
+                        • TX Power: 20-40 dBm<br>
+                        • RX Sensitivity: -100 to -90 dBm
                     </small>
                 </div>
                 
                 <div class="mt-3">
-                    <h6>Reuse Patterns:</h6>
+                    <h6>Cluster Sizes:</h6>
                     <small>
-                        • N=3: Higher capacity, more interference<br>
+                        • Available: 1, 3, 4, 7, 9, 12, 13, 16, 19, 21, 28<br>
+                        • N=3: High capacity, more interference<br>
                         • N=7: Balanced performance<br>
-                        • N=12: Better quality, lower capacity
+                        • N=12: Better quality, lower capacity<br>
+                        • Reuse efficiency: 1/N
                     </small>
+                </div>
+                
+                <div class="mt-3">
+                    <h6>Environment Guide:</h6>
+                    <small>
+                        • Free Space: n=2<br>
+                        • Rural/Suburban: n=2.5-3<br>
+                        • Urban: n=3-4<br>
+                        • Dense Urban: n=4-5<br>
+                        • Indoor: n=1.6-3.5
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Presets Card -->
+        <div class="card bg-info text-white mt-3">
+            <div class="card-header">
+                <h6><i class="fas fa-star me-2"></i>Quick Presets</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-light btn-sm" onclick="loadPreset('gsm_urban')">
+                        <i class="fas fa-building me-1"></i>GSM Urban
+                    </button>
+                    <button class="btn btn-light btn-sm" onclick="loadPreset('lte_suburban')">
+                        <i class="fas fa-home me-1"></i>LTE Suburban
+                    </button>
+                    <button class="btn btn-light btn-sm" onclick="loadPreset('5g_dense')">
+                        <i class="fas fa-city me-1"></i>5G Dense Urban
+                    </button>
+                    <button class="btn btn-light btn-sm" onclick="loadPreset('rural_coverage')">
+                        <i class="fas fa-tree me-1"></i>Rural Coverage
+                    </button>
                 </div>
             </div>
         </div>
@@ -155,25 +225,354 @@
         <div id="results" style="display: none;"></div>
     </div>
 </div>
+
+<!-- System Performance Indicator -->
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="card d-none" id="systemPerformanceCard">
+            <div class="card-header bg-success text-white">
+                <h5><i class="fas fa-tachometer-alt me-2"></i>System Performance Assessment</h5>
+            </div>
+            <div class="card-body">
+                <div id="systemPerformanceContent"></div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
+// Preset configurations for cellular systems
+const presets = {
+    gsm_urban: {
+        time_slots_per_carrier: 8,
+        total_area: 50,
+        max_num_users: 5000,
+        avg_call_duration: 120,
+        avg_call_rate_per_user: 3,
+        gos: 0.02,
+        sir_db: 15,
+        p0_dbm: 35,
+        receiver_sensitivity_dbm: -102,
+        d0_m: 1000,
+        path_loss_exponent: 4
+    },
+    lte_suburban: {
+        time_slots_per_carrier: 8,
+        total_area: 200,
+        max_num_users: 15000,
+        avg_call_duration: 150,
+        avg_call_rate_per_user: 2.5,
+        gos: 0.01,
+        sir_db: 20,
+        p0_dbm: 40,
+        receiver_sensitivity_dbm: -95,
+        d0_m: 1000,
+        path_loss_exponent: 3.5
+    },
+    '5g_dense': {
+        time_slots_per_carrier: 8,
+        total_area: 25,
+        max_num_users: 20000,
+        avg_call_duration: 90,
+        avg_call_rate_per_user: 4,
+        gos: 0.005,
+        sir_db: 25,
+        p0_dbm: 30,
+        receiver_sensitivity_dbm: -90,
+        d0_m: 500,
+        path_loss_exponent: 4.5
+    },
+    rural_coverage: {
+        time_slots_per_carrier: 8,
+        total_area: 500,
+        max_num_users: 3000,
+        avg_call_duration: 180,
+        avg_call_rate_per_user: 1.5,
+        gos: 0.05,
+        sir_db: 12,
+        p0_dbm: 45,
+        receiver_sensitivity_dbm: -110,
+        d0_m: 2000,
+        path_loss_exponent: 2.5
+    }
+};
+
+function loadPreset(type) {
+    const preset = presets[type];
+    if (preset) {
+        for (const [key, value] of Object.entries(preset)) {
+            const element = document.getElementById(key);
+            if (element) {
+                element.value = value;
+            }
+        }
+    }
+}
+
+// Reset button handler
+document.getElementById('resetBtn').addEventListener('click', function() {
+    loadPreset('gsm_urban');
+});
+
+// Enhanced results display function matching the style of other pages
+function displayAdvancedCellularResults(results, explanation) {
+    const resultsDiv = document.getElementById('results');
+    
+    resultsDiv.innerHTML = `
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4><i class="fas fa-chart-bar me-2"></i>Advanced Cellular System Design Results</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">                    <!-- Coverage Analysis -->
+                    <div class="col-md-6 mb-3">
+                        <div class="result-card p-3 rounded" style="background: linear-gradient(135deg, #0056b3, #007bff); color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <h6><i class="fas fa-map me-2"></i>Coverage Analysis</h6>
+                            <div class="row mb-2">
+                                <div class="col-6"><strong>Max Distance:</strong></div>
+                                <div class="col-6">${(results.max_distance_km || 0).toFixed(3)} km</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-6"><strong>Max Cell Size:</strong></div>
+                                <div class="col-6">${(results.max_cell_size_km2 || 0).toFixed(3)} km²</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-6"><strong>Total Cells:</strong></div>
+                                <div class="col-6">${results.total_num_cells || 0} cells</div>
+                            </div>
+                            <div class="row mb-0">
+                                <div class="col-6"><strong>Cell Density:</strong></div>
+                                <div class="col-6">${(results.cell_density || 0).toFixed(2)} cells/km²</div>
+                            </div>
+                        </div>
+                    </div>
+                      <!-- Link Budget -->
+                    <div class="col-md-6 mb-3">
+                        <div class="result-card p-3 rounded" style="background: linear-gradient(135deg, #0d7377, #17a2b8); color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <h6><i class="fas fa-signal me-2"></i>Link Budget</h6>
+                            <div class="row mb-2">
+                                <div class="col-6"><strong>TX Power:</strong></div>
+                                <div class="col-6">${results.p0_watt ? (results.p0_watt*1000).toFixed(2) + ' mW' : 'N/A'}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-6"><strong>RX Sensitivity:</strong></div>
+                                <div class="col-6">${results.receiver_sensitivity_watt ? (results.receiver_sensitivity_watt*1e12).toFixed(2) + ' pW' : 'N/A'}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-6"><strong>Path Loss Exp:</strong></div>
+                                <div class="col-6">${document.getElementById('path_loss_exponent').value}</div>
+                            </div>
+                            <div class="row mb-0">
+                                <div class="col-6"><strong>Reference Dist:</strong></div>
+                                <div class="col-6">${(document.getElementById('d0_m').value/1000).toFixed(1)} km</div>
+                            </div>
+                        </div>
+                    </div>
+                      <!-- Interference Analysis -->
+                    <div class="col-md-6 mb-3">
+                        <div class="result-card p-3 rounded" style="background: linear-gradient(135deg, #e8500a, #fd7e14); color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <h6><i class="fas fa-shield-alt me-2"></i>Interference Analysis</h6>
+                            <div class="row mb-2">
+                                <div class="col-7"><strong>Required SIR:</strong></div>
+                                <div class="col-5">${document.getElementById('sir_db').value} dB</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-7"><strong>Cluster Size:</strong></div>
+                                <div class="col-5">N = ${results.cluster_size_n || 'N/A'}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-7"><strong>Min Required:</strong></div>
+                                <div class="col-5">${results.x_value ? results.x_value.toFixed(2) : 'N/A'}</div>
+                            </div>
+                            <div class="row mb-0">
+                                <div class="col-7"><strong>Reuse Efficiency:</strong></div>
+                                <div class="col-5">${results.cluster_size_n ? (1/results.cluster_size_n).toFixed(3) : 'N/A'}</div>
+                            </div>
+                        </div>
+                    </div>
+                      <!-- Traffic Engineering -->
+                    <div class="col-md-6 mb-3">
+                        <div class="result-card p-3 rounded" style="background: linear-gradient(135deg, #155724, #28a745); color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <h6><i class="fas fa-phone me-2"></i>Traffic Engineering</h6>
+                            <div class="row mb-2">
+                                <div class="col-7"><strong>Traffic/User:</strong></div>
+                                <div class="col-5">${results.traffic_per_user_erlang ? (results.traffic_per_user_erlang*1000).toFixed(2) + ' mE' : 'N/A'}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-7"><strong>System Traffic:</strong></div>
+                                <div class="col-5">${results.traffic_all_system_erlang ? results.traffic_all_system_erlang.toFixed(2) + ' E' : 'N/A'}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-7"><strong>Traffic/Cell:</strong></div>
+                                <div class="col-5">${results.traffic_load_each_cell_erlang ? results.traffic_load_each_cell_erlang.toFixed(3) + ' E' : 'N/A'}</div>
+                            </div>
+                            <div class="row mb-0">
+                                <div class="col-7"><strong>GOS:</strong></div>
+                                <div class="col-5">${(document.getElementById('gos').value*100).toFixed(1)}%</div>
+                            </div>
+                        </div>
+                    </div>
+                      <!-- Channel Assignment -->
+                    <div class="col-md-6 mb-3">
+                        <div class="result-card p-3 rounded" style="background: linear-gradient(135deg, #c82333, #dc3545); color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <h6><i class="fas fa-broadcast-tower me-2"></i>Channel Assignment</h6>
+                            <div class="row mb-2">
+                                <div class="col-7"><strong>Channels/Cell:</strong></div>
+                                <div class="col-5">${results.num_channels_required || 'N/A'}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-7"><strong>Time Slots/Carrier:</strong></div>
+                                <div class="col-5">${document.getElementById('time_slots_per_carrier').value}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-7"><strong>Carriers/Cell:</strong></div>
+                                <div class="col-5">${results.num_carriers_per_cell || 'N/A'}</div>
+                            </div>
+                            <div class="row mb-0">
+                                <div class="col-7"><strong>System Carriers:</strong></div>
+                                <div class="col-5">${results.num_carriers_in_system || 'N/A'}</div>
+                            </div>
+                        </div>
+                    </div>
+                      <!-- System Performance -->
+                    <div class="col-md-6 mb-3">
+                        <div class="result-card p-3 rounded" style="background: linear-gradient(135deg, #2c3e50, #495057); color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <h6><i class="fas fa-chart-pie me-2"></i>System Performance</h6>
+                            <div class="row mb-2">
+                                <div class="col-7"><strong>Total Users:</strong></div>
+                                <div class="col-5">${document.getElementById('max_num_users').value ? parseInt(document.getElementById('max_num_users').value).toLocaleString() : 'N/A'}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-7"><strong>Channel Capacity:</strong></div>
+                                <div class="col-5">${results.actual_system_capacity_channels || 'N/A'}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-7"><strong>Channel Utilization:</strong></div>
+                                <div class="col-5">${results.channel_utilization ? (results.channel_utilization*100).toFixed(1) + '%' : 'N/A'}</div>
+                            </div>
+                            <div class="row mb-0">
+                                <div class="col-7"><strong>Spectrum Efficiency:</strong></div>
+                                <div class="col-5">${results.spectrum_efficiency ? results.spectrum_efficiency.toFixed(1) + ' u/km²' : 'N/A'}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add AI explanation if available
+    if (explanation) {
+        resultsDiv.innerHTML += `
+            <div class="explanation-box mt-4">
+                <h5><i class="fas fa-robot me-2 text-primary"></i>Gemini AI Explanation</h5>
+                <div class="ai-content">${formatAIContent(explanation)}</div>
+            </div>
+        `;
+    }
+
+    // Add AI Chat Interface
+    resultsDiv.innerHTML += createAIChatInterface();
+    
+    resultsDiv.style.display = 'block';
+    
+    // Calculate and display system performance assessment
+    displaySystemPerformance(results);
+    
+    // Initialize AI chat
+    initializeAIChat();
+}
+
+function displaySystemPerformance(results) {
+    const utilization = results.channel_utilization || 0;
+    const clusterSize = results.cluster_size_n || 7;
+    const cellDensity = results.cell_density || 0;
+    
+    let performanceClass = 'success';
+    let performanceText = 'Excellent';
+    let performanceIcon = 'fas fa-check-circle';
+    
+    if (utilization > 0.9) {
+        performanceClass = 'danger';
+        performanceText = 'Over-utilized';
+        performanceIcon = 'fas fa-exclamation-triangle';
+    } else if (utilization > 0.7) {
+        performanceClass = 'warning';
+        performanceText = 'High Utilization';
+        performanceIcon = 'fas fa-exclamation-circle';
+    } else if (utilization < 0.3) {
+        performanceClass = 'info';
+        performanceText = 'Under-utilized';
+        performanceIcon = 'fas fa-info-circle';
+    }
+    
+    const performanceHtml = `
+        <div class="alert alert-${performanceClass}">
+            <h6><i class="${performanceIcon} me-2"></i>System Performance: ${performanceText}</h6>
+            <p><strong>Channel Utilization:</strong> ${(utilization*100).toFixed(1)}%</p>
+            <small>
+                ${utilization > 0.9 ? 'System overloaded - increase cells or channels' : 
+                  utilization > 0.7 ? 'High utilization - monitor for congestion' :
+                  utilization < 0.3 ? 'Low utilization - system can handle more traffic' :
+                  'Optimal utilization with good performance'}
+            </small>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="progress mb-2">
+                    <div class="progress-bar bg-${performanceClass}" role="progressbar" 
+                         style="width: ${Math.min(100, utilization * 100)}%">
+                        Utilization
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="progress mb-2">
+                    <div class="progress-bar bg-info" role="progressbar" 
+                         style="width: ${Math.min(100, (1/clusterSize) * 100 * 7)}%">
+                        Reuse Efficiency
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="progress mb-2">
+                    <div class="progress-bar bg-success" role="progressbar" 
+                         style="width: ${Math.min(100, Math.max(20, cellDensity * 20))}%">
+                        Coverage Density
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('systemPerformanceContent').innerHTML = performanceHtml;
+    document.getElementById('systemPerformanceCard').classList.remove('d-none');
+}
+
 document.getElementById('calculationForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     showLoading('calculateBtn');
     
     const formData = {
-        coverage_area_km2: parseFloat(document.getElementById('coverage_area_km2').value),
-        cell_radius_km: parseFloat(document.getElementById('cell_radius_km').value),
-        frequency_reuse_factor: parseInt(document.getElementById('frequency_reuse_factor').value),
-        total_spectrum_mhz: parseFloat(document.getElementById('total_spectrum_mhz').value),
-        users_per_cell: parseInt(document.getElementById('users_per_cell').value),
-        traffic_per_user_erlang: parseFloat(document.getElementById('traffic_per_user_erlang').value),
-        blocking_probability: parseFloat(document.getElementById('blocking_probability').value) / 100,
-        sectorization: parseInt(document.getElementById('sectorization').value)
+        time_slots_per_carrier: parseInt(document.getElementById('time_slots_per_carrier').value),
+        total_area: parseFloat(document.getElementById('total_area').value),
+        max_num_users: parseInt(document.getElementById('max_num_users').value),
+        avg_call_duration: parseFloat(document.getElementById('avg_call_duration').value),
+        avg_call_rate_per_user: parseFloat(document.getElementById('avg_call_rate_per_user').value),
+        gos: parseFloat(document.getElementById('gos').value),
+        sir_db: parseFloat(document.getElementById('sir_db').value),
+        p0_dbm: parseFloat(document.getElementById('p0_dbm').value),
+        receiver_sensitivity_dbm: parseFloat(document.getElementById('receiver_sensitivity_dbm').value),
+        d0_m: parseFloat(document.getElementById('d0_m').value),
+        path_loss_exponent: parseFloat(document.getElementById('path_loss_exponent').value)
     };
+    
+    // Store for AI chat
+    currentScenario = 'cellular_design';
+    currentParameters = formData;
     
     try {
         const response = await fetch('/calculate/cellular_design', {
@@ -184,18 +583,25 @@ document.getElementById('calculationForm').addEventListener('submit', async func
             body: JSON.stringify(formData)
         });
         
-        const result = await response.json();
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayAdvancedCellularResults(result.results, result.explanation);
+                } else {
+                    showError(result.error || 'Calculation failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Network error or server unavailable');
+            } finally {
+                hideLoading('calculateBtn');
+            }
+        });
         
-        if (result.success) {
-            displayResults(result.results, result.explanation);
-        } else {
-            displayError(result.error);
-        }
-    } catch (error) {
-        displayError('Network error: ' + error.message);
-    } finally {
-        hideLoading('calculateBtn');
-    }
-});
-</script>
-{% endblock %}
+        // Load default preset on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPreset('gsm_urban');
+        });
+        </script>
+        {% endblock %}
+        
