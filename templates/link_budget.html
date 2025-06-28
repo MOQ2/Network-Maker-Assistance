@@ -7,7 +7,7 @@
     <div class="col-12">
         <div class="text-center text-white mb-4">
             <h1><i class="fas fa-satellite-dish me-2"></i>Link Budget Calculation</h1>
-            <p class="lead">Analyze transmission power and received signal strength in flat environment</p>
+            <p class="lead">Calculate transmitted and received power using comprehensive link budget formulas</p>
         </div>
     </div>
 </div>
@@ -15,93 +15,101 @@
 <div class="row">
     <div class="col-lg-8">
         <div class="card">
-            <div class="card-header bg-warning text-dark">
-                <h4><i class="fas fa-cogs me-2"></i>Link Parameters</h4>
+            <div class="card-header bg-primary text-white">
+                <h4><i class="fas fa-cogs me-2"></i>Link Budget Parameters</h4>
             </div>
             <div class="card-body">
                 <form id="calculationForm">
-                    <!-- Transmitter Parameters -->
+                    <!-- System Parameters -->
                     <div class="parameter-section">
-                        <h5><i class="fas fa-broadcast-tower me-2"></i>Transmitter Specifications</h5>
+                        <h5><i class="fas fa-satellite-dish me-2"></i>Transmission Parameters</h5>
                         <div class="row">
                             <div class="col-md-6">
-                                <label class="form-label">Transmit Power (dBm)</label>
-                                <input type="number" class="form-control" id="transmit_power_dbm" value="30" step="0.1">
-                                <small class="form-text text-muted">Power at transmitter output (e.g., 30 dBm = 1W)</small>
+                                <label class="form-label">Path Loss (Lp in dB)</label>
+                                <input type="number" class="form-control" id="lp_db" value="10.0" step="any">
+                                <small class="form-text text-muted">Total path loss in the communication link</small>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Transmit Antenna Gain (dBi)</label>
-                                <input type="number" class="form-control" id="transmit_antenna_gain_db" value="15" step="0.1">
-                                <small class="form-text text-muted">Antenna gain over isotropic radiator</small>
+                                <label class="form-label">Frequency (MHz)</label>
+                                <input type="number" class="form-control" id="frequency_mhz" value="1000.0" step="any">
+                                <small class="form-text text-muted">Operating frequency in MHz</small>
                             </div>
                         </div>
                         <div class="row mt-3">
                             <div class="col-md-6">
-                                <label class="form-label">Cable/Connector Loss (dB)</label>
-                                <input type="number" class="form-control" id="cable_loss_db" value="2" step="0.1" min="0">
-                                <small class="form-text text-muted">Losses between transmitter and antenna</small>
+                                <label class="form-label">Transmitter Antenna Gain (Gt in dB)</label>
+                                <input type="number" class="form-control" id="gt_db" value="32.0" step="any">
+                                <small class="form-text text-muted">Transmitter antenna gain in dB</small>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Transmitter Type</label>
-                                <select class="form-select" id="transmitter_type">
-                                    <option value="wifi">WiFi Router (20 dBm)</option>
-                                    <option value="cellular" selected>Cellular Base Station (43 dBm)</option>
-                                    <option value="mobile">Mobile Phone (23 dBm)</option>
-                                    <option value="satellite">Satellite (50 dBm)</option>
-                                    <option value="custom">Custom</option>
-                                </select>
-                                <small class="form-text text-muted">Preset configurations for common systems</small>
+                                <label class="form-label">Receiver Antenna Gain (Gr in dB)</label>
+                                <input type="number" class="form-control" id="gr_db" value="32.0" step="any">
+                                <small class="form-text text-muted">Receiver antenna gain in dB</small>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Path Parameters -->
+                    <!-- Data and Loss Parameters -->
                     <div class="parameter-section">
-                        <h5><i class="fas fa-route me-2"></i>Propagation Path</h5>
+                        <h5><i class="fas fa-chart-line me-2"></i>Data Rate and Losses</h5>
                         <div class="row">
                             <div class="col-md-6">
-                                <label class="form-label">Frequency (MHz)</label>
-                                <input type="number" class="form-control" id="frequency_mhz" value="2400" step="0.1">
-                                <small class="form-text text-muted">Operating frequency (e.g., 2.4 GHz WiFi, 1.8 GHz GSM)</small>
+                                <label class="form-label">Data Rate (kbps)</label>
+                                <input type="number" class="form-control" id="data_rate_kbps" value="1231.0" step="any">
+                                <small class="form-text text-muted">Data transmission rate in kbps</small>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Distance (km)</label>
-                                <input type="number" class="form-control" id="distance_km" value="1" step="0.001" min="0.001">
-                                <small class="form-text text-muted">Transmitter to receiver distance</small>
+                                <label class="form-label">Antenna Feed Line Loss (Lf in dB)</label>
+                                <input type="number" class="form-control" id="lf_db" value="1.0" step="any">
+                                <small class="form-text text-muted">Feed line losses in dB</small>
                             </div>
                         </div>
                         <div class="row mt-3">
                             <div class="col-md-6">
-                                <label class="form-label">Environment Type</label>
-                                <select class="form-select" id="environment_type">
-                                    <option value="free_space" selected>Free Space</option>
-                                    <option value="urban">Urban (additional 10-20 dB loss)</option>
-                                    <option value="suburban">Suburban (additional 5-10 dB loss)</option>
-                                    <option value="rural">Rural (additional 0-5 dB loss)</option>
-                                </select>
-                                <small class="form-text text-muted">Propagation environment characteristics</small>
+                                <label class="form-label">Other Losses (Lo in dB)</label>
+                                <input type="number" class="form-control" id="lo_db" value="1.0" step="any">
+                                <small class="form-text text-muted">Miscellaneous losses in dB</small>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Weather/Atmospheric Loss (dB)</label>
-                                <input type="number" class="form-control" id="atmospheric_loss_db" value="0" step="0.1" min="0">
-                                <small class="form-text text-muted">Rain fade, atmospheric absorption</small>
+                                <label class="form-label">Fade Margin (Lfm in dB)</label>
+                                <input type="number" class="form-control" id="lfm_db" value="1.0" step="any">
+                                <small class="form-text text-muted">Fade margin to account for signal variations</small>
                             </div>
                         </div>
                     </div>
 
                     <!-- Receiver Parameters -->
                     <div class="parameter-section">
-                        <h5><i class="fas fa-satellite-dish me-2"></i>Receiver Specifications</h5>
+                        <h5><i class="fas fa-volume-up me-2"></i>Receiver and Noise Parameters</h5>
                         <div class="row">
                             <div class="col-md-6">
-                                <label class="form-label">Receive Antenna Gain (dBi)</label>
-                                <input type="number" class="form-control" id="receive_antenna_gain_db" value="10" step="0.1">
-                                <small class="form-text text-muted">Receiver antenna gain over isotropic</small>
+                                <label class="form-label">Receiver Amplifier Gain (Ar in dB)</label>
+                                <input type="number" class="form-control" id="ar_db" value="2.0" step="any">
+                                <small class="form-text text-muted">Receiver amplifier gain in dB</small>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Miscellaneous Losses (dB)</label>
-                                <input type="number" class="form-control" id="misc_losses_db" value="3" step="0.1" min="0">
-                                <small class="form-text text-muted">Polarization mismatch, implementation losses</small>
+                                <label class="form-label">Noise Figure (N in dB)</label>
+                                <input type="number" class="form-control" id="n_db" value="3.0" step="any">
+                                <small class="form-text text-muted">Receiver noise figure in dB</small>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Noise Temperature (Kelvin)</label>
+                                <input type="number" class="form-control" id="noise_temp_k" value="3.0" step="any">
+                                <small class="form-text text-muted">System noise temperature in Kelvin</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Link Margin (M in dB)</label>
+                                <input type="number" class="form-control" id="m_db" value="1.0" step="any">
+                                <small class="form-text text-muted">Link margin for reliable communication</small>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Eb/No (in dB)</label>
+                                <input type="number" class="form-control" id="ebno_db" value="1.0" step="any">
+                                <small class="form-text text-muted">Energy per bit to noise ratio in dB</small>
                             </div>
                         </div>
                     </div>
@@ -110,9 +118,6 @@
                         <button type="submit" class="btn btn-calculate btn-lg" id="calculateBtn">
                             <i class="fas fa-calculator me-2"></i>Calculate Link Budget
                             <div class="spinner-border spinner-border-sm ms-2 loading-spinner" role="status"></div>
-                        </button>
-                        <button type="button" class="btn btn-secondary btn-lg ms-2" id="resetBtn">
-                            <i class="fas fa-undo me-2"></i>Reset to Defaults
                         </button>
                     </div>
                 </form>
@@ -127,72 +132,33 @@
             </div>
             <div class="card-body">
                 <div class="formula-box">
-                    <strong>Free Space Path Loss:</strong><br>
-                    FSPL = 32.45 + 20log₁₀(f<sub>MHz</sub>) + 20log₁₀(d<sub>km</sub>)<br><br>
+                    <strong>Link Budget Chain:</strong><br><br>
                     
-                    <strong>Effective Isotropic Radiated Power:</strong><br>
-                    EIRP = P<sub>tx</sub> + G<sub>tx</sub> - L<sub>cable</sub><br><br>
+                    <strong>1. Noise Temperature (dB):</strong><br>
+                    Tₙ = 10 × log₁₀(T)<br><br>
                     
-                    <strong>Received Signal Strength:</strong><br>
-                    RSS = EIRP - FSPL + G<sub>rx</sub> - L<sub>misc</sub> - L<sub>atm</sub><br><br>
+                    <strong>2. Data Rate (dB):</strong><br>
+                    R = 10 × log₁₀(Data Rate in bps)<br><br>
                     
-                    <strong>Link Budget Equation:</strong><br>
-                    P<sub>rx</sub> = P<sub>tx</sub> + G<sub>tx</sub> + G<sub>rx</sub> - L<sub>total</sub>
+                    <strong>3. Received Power:</strong><br>
+                    Pᵣ = M - 228.6 + Tₙ + N + R + Eb/No<br><br>
+                    
+                    <strong>4. Transmitted Power:</strong><br>
+                    Pₜ = Pᵣ + Lp + Lf + Lo + Lfm - Gt - Gr - Ar<br><br>
+                    
+                    <strong>5. Convert to Watts:</strong><br>
+                    Watts = 10^(dB / 10)
                 </div>
                 
                 <div class="mt-3">
-                    <h6>Typical Power Levels:</h6>
+                    <h6>Typical Values:</h6>
                     <small>
-                        • WiFi Router: 20 dBm (100 mW)<br>
-                        • Cell Phone: 23 dBm (200 mW)<br>
-                        • Base Station: 43 dBm (20 W)<br>
-                        • Satellite: 50+ dBm (100+ W)<br>
-                        • Receiver Sensitivity: -80 to -110 dBm
+                        • Path Loss: 60-200 dB (depending on distance/frequency)<br>
+                        • Antenna Gains: 0-50 dB (isotropic to high-gain)<br>
+                        • Feed Line Loss: 0.5-5 dB<br>
+                        • Fade Margin: 5-20 dB<br>
+                        • Noise Figure: 1-10 dB
                     </small>
-                </div>
-                
-                <div class="mt-3">
-                    <h6>Frequency Examples:</h6>
-                    <small>
-                        • WiFi 2.4 GHz: 2400 MHz<br>
-                        • WiFi 5 GHz: 5800 MHz<br>
-                        • GSM 900: 900 MHz<br>
-                        • LTE Band 3: 1800 MHz<br>
-                        • 5G mmWave: 28000 MHz
-                    </small>
-                </div>
-                
-                <div class="mt-3">
-                    <h6>Power Conversion:</h6>
-                    <small>
-                        P(dBm) = 10log₁₀(P<sub>mW</sub>)<br>
-                        P(mW) = 10^(P<sub>dBm</sub>/10)<br>
-                        0 dBm = 1 mW<br>
-                        30 dBm = 1 W
-                    </small>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Presets Card -->
-        <div class="card bg-info text-white mt-3">
-            <div class="card-header">
-                <h6><i class="fas fa-star me-2"></i>Quick Presets</h6>
-            </div>
-            <div class="card-body">
-                <div class="d-grid gap-2">
-                    <button class="btn btn-light btn-sm" onclick="loadPreset('wifi')">
-                        <i class="fas fa-wifi me-1"></i>WiFi 2.4GHz
-                    </button>
-                    <button class="btn btn-light btn-sm" onclick="loadPreset('cellular')">
-                        <i class="fas fa-signal me-1"></i>Cellular LTE
-                    </button>
-                    <button class="btn btn-light btn-sm" onclick="loadPreset('satellite')">
-                        <i class="fas fa-satellite me-1"></i>Satellite Link
-                    </button>
-                    <button class="btn btn-light btn-sm" onclick="loadPreset('microwave')">
-                        <i class="fas fa-tower-broadcast me-1"></i>Microwave
-                    </button>
                 </div>
             </div>
         </div>
@@ -204,173 +170,29 @@
         <div id="results" style="display: none;"></div>
     </div>
 </div>
-
-<!-- Link Quality Indicator -->
-<div class="row mt-3">
-    <div class="col-12">
-        <div class="card d-none" id="linkQualityCard">
-            <div class="card-header bg-success text-white">
-                <h5><i class="fas fa-signal me-2"></i>Link Quality Assessment</h5>
-            </div>
-            <div class="card-body">
-                <div id="linkQualityContent"></div>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-// Preset configurations
-const presets = {
-    wifi: {
-        transmit_power_dbm: 20,
-        transmit_antenna_gain_db: 2,
-        cable_loss_db: 1,
-        frequency_mhz: 2400,
-        distance_km: 0.1,
-        receive_antenna_gain_db: 2,
-        misc_losses_db: 2,
-        atmospheric_loss_db: 0
-    },
-    cellular: {
-        transmit_power_dbm: 43,
-        transmit_antenna_gain_db: 17,
-        cable_loss_db: 3,
-        frequency_mhz: 1800,
-        distance_km: 2,
-        receive_antenna_gain_db: 0,
-        misc_losses_db: 5,
-        atmospheric_loss_db: 0
-    },
-    satellite: {
-        transmit_power_dbm: 55,
-        transmit_antenna_gain_db: 45,
-        cable_loss_db: 2,
-        frequency_mhz: 12000,
-        distance_km: 36000,
-        receive_antenna_gain_db: 35,
-        misc_losses_db: 3,
-        atmospheric_loss_db: 2
-    },
-    microwave: {
-        transmit_power_dbm: 30,
-        transmit_antenna_gain_db: 30,
-        cable_loss_db: 2,
-        frequency_mhz: 6000,
-        distance_km: 25,
-        receive_antenna_gain_db: 30,
-        misc_losses_db: 2,
-        atmospheric_loss_db: 1
-    }
-};
-
-function loadPreset(type) {
-    const preset = presets[type];
-    if (preset) {
-        for (const [key, value] of Object.entries(preset)) {
-            const element = document.getElementById(key);
-            if (element) {
-                element.value = value;
-            }
-        }
-    }
-}
-
-// Transmitter type change handler
-document.getElementById('transmitter_type').addEventListener('change', function() {
-    const type = this.value;
-    if (type !== 'custom') {
-        const powerMap = {
-            wifi: 20,
-            cellular: 43,
-            mobile: 23,
-            satellite: 55
-        };
-        const gainMap = {
-            wifi: 2,
-            cellular: 17,
-            mobile: 0,
-            satellite: 45
-        };
-        if (powerMap[type]) {
-            document.getElementById('transmit_power_dbm').value = powerMap[type];
-            document.getElementById('transmit_antenna_gain_db').value = gainMap[type];
-        }
-    }
-});
-
-// Reset button handler
-document.getElementById('resetBtn').addEventListener('click', function() {
-    loadPreset('wifi');
-});
-
-// Enhanced results display with link quality assessment
-function displayResultsWithQuality(results, explanation) {
-    displayResults(results, explanation);
-    
-    // Calculate and display link quality
-    const rss = results.rss_dbm || 0;
-    const sensitivity = -95; // Typical receiver sensitivity
-    const fadeMargin = 10; // Typical fade margin
-    const linkMargin = rss - sensitivity - fadeMargin;
-    
-    let qualityClass = 'success';
-    let qualityText = 'Excellent';
-    let qualityIcon = 'fas fa-signal';
-    
-    if (linkMargin < 0) {
-        qualityClass = 'danger';
-        qualityText = 'Link Failure';
-        qualityIcon = 'fas fa-exclamation-triangle';
-    } else if (linkMargin < 5) {
-        qualityClass = 'warning';
-        qualityText = 'Marginal';
-        qualityIcon = 'fas fa-exclamation-circle';
-    } else if (linkMargin < 15) {
-        qualityClass = 'info';
-        qualityText = 'Good';
-        qualityIcon = 'fas fa-check-circle';
-    }
-    
-    const qualityHtml = `
-        <div class="alert alert-${qualityClass}">
-            <h6><i class="${qualityIcon} me-2"></i>Link Quality: ${qualityText}</h6>
-            <p><strong>Link Margin:</strong> ${linkMargin.toFixed(2)} dB</p>
-            <small>
-                ${linkMargin < 0 ? 'Signal too weak - increase power or improve antennas' : 
-                  linkMargin < 5 ? 'Marginal link - consider adding fade margin' :
-                  linkMargin < 15 ? 'Good link quality with adequate margin' :
-                  'Excellent link with high reliability'}
-            </small>
-        </div>
-        <div class="progress mb-3">
-            <div class="progress-bar bg-${qualityClass}" role="progressbar" 
-                 style="width: ${Math.min(100, Math.max(0, (linkMargin + 10) * 5))}%">
-                Signal Quality
-            </div>
-        </div>
-    `;
-    
-    document.getElementById('linkQualityContent').innerHTML = qualityHtml;
-    document.getElementById('linkQualityCard').classList.remove('d-none');
-}
-
 document.getElementById('calculationForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     showLoading('calculateBtn');
     
     const formData = {
-        transmit_power_dbm: parseFloat(document.getElementById('transmit_power_dbm').value),
-        transmit_antenna_gain_db: parseFloat(document.getElementById('transmit_antenna_gain_db').value),
-        receive_antenna_gain_db: parseFloat(document.getElementById('receive_antenna_gain_db').value),
+        lp_db: parseFloat(document.getElementById('lp_db').value),
         frequency_mhz: parseFloat(document.getElementById('frequency_mhz').value),
-        distance_km: parseFloat(document.getElementById('distance_km').value),
-        cable_loss_db: parseFloat(document.getElementById('cable_loss_db').value),
-        misc_losses_db: parseFloat(document.getElementById('misc_losses_db').value),
-        atmospheric_loss_db: parseFloat(document.getElementById('atmospheric_loss_db').value || 0)
+        gt_db: parseFloat(document.getElementById('gt_db').value),
+        gr_db: parseFloat(document.getElementById('gr_db').value),
+        data_rate_kbps: parseFloat(document.getElementById('data_rate_kbps').value),
+        lf_db: parseFloat(document.getElementById('lf_db').value),
+        lo_db: parseFloat(document.getElementById('lo_db').value),
+        lfm_db: parseFloat(document.getElementById('lfm_db').value),
+        ar_db: parseFloat(document.getElementById('ar_db').value),
+        n_db: parseFloat(document.getElementById('n_db').value),
+        noise_temp_k: parseFloat(document.getElementById('noise_temp_k').value),
+        m_db: parseFloat(document.getElementById('m_db').value),
+        ebno_db: parseFloat(document.getElementById('ebno_db').value)
     };
     
     // Store for AI chat
@@ -390,7 +212,7 @@ document.getElementById('calculationForm').addEventListener('submit', async func
         
         if (result.success) {
             currentResults = result.results;
-            displayResultsWithQuality(result.results, result.explanation);
+            displayResults(result.results, result.explanation);
         } else {
             displayError(result.error);
         }
@@ -399,11 +221,6 @@ document.getElementById('calculationForm').addEventListener('submit', async func
     } finally {
         hideLoading('calculateBtn');
     }
-});
-
-// Load WiFi preset by default
-window.addEventListener('load', function() {
-    loadPreset('wifi');
 });
 </script>
 {% endblock %}

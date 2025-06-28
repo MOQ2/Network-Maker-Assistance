@@ -324,19 +324,29 @@ class WirelessNetworkCalculator:
         """
         Scenario 1: Wireless Communication System
         Computes rates at output of each block in the communication chain
+        Uses Nyquist rate sampling (fs = 2 * bandwidth)
         """
         try:
             # Input parameters
-            source_rate = float(params.get('source_rate', 0))  # bits/second
-            sampling_frequency = float(params.get('sampling_frequency', 0))  # Hz
+            signal_bandwidth = float(params.get('signal_bandwidth', 0))  # Hz
+            sampling_frequency = float(params.get('sampling_frequency', 0))  # Hz (Nyquist rate)
             quantization_levels = int(params.get('quantization_levels', 2))
             source_coding_efficiency = float(params.get('source_coding_efficiency', 1.0))
             channel_coding_rate = float(params.get('channel_coding_rate', 1.0))
             interleaver_block_size = int(params.get('interleaver_block_size', 1))
             burst_format_overhead = float(params.get('burst_format_overhead', 0))
             
+            # Verify Nyquist rate
+            nyquist_rate = 2 * signal_bandwidth
+            if abs(sampling_frequency - nyquist_rate) > 0.1:  # Allow small floating point differences
+                sampling_frequency = nyquist_rate
+            
             # Calculations for each block
             results = {}
+            
+            # Store input parameters for reference
+            results['signal_bandwidth'] = signal_bandwidth
+            results['nyquist_rate'] = nyquist_rate
             
             # 1. Sampler output rate
             sampler_rate = sampling_frequency
@@ -368,19 +378,31 @@ class WirelessNetworkCalculator:
                 'success': True,
                 'results': results,
                 'explanation': f"""
-                The wireless communication system processes data through multiple stages:
+                The wireless communication system processes data through multiple stages using Nyquist rate sampling:
                 
-                1. **Sampler**: Converts analog signal to discrete samples at {sampler_rate} Hz
+                **Input Signal**: Bandwidth = {signal_bandwidth:.0f} Hz
+                
+                1. **Sampler**: Converts analog signal to discrete samples at Nyquist rate
+                   Nyquist Rate = 2 × Bandwidth = {nyquist_rate:.0f} Hz
+                   Sampling Rate: {sampler_rate:.0f} Hz
+                   
                 2. **Quantizer**: Each sample is quantized to {quantization_levels} levels ({bits_per_sample:.1f} bits/sample)
                    Output rate: {quantizer_rate:.2f} bits/second
+                   
                 3. **Source Encoder**: Reduces redundancy with efficiency {source_coding_efficiency}
                    Output rate: {source_encoder_rate:.2f} bits/second
+                   
                 4. **Channel Encoder**: Adds redundancy for error correction (rate {channel_coding_rate})
                    Output rate: {channel_encoder_rate:.2f} bits/second
+                   
                 5. **Interleaver**: Rearranges data to combat burst errors
                    Output rate: {interleaver_rate:.2f} bits/second (unchanged)
+                   
                 6. **Burst Formatter**: Adds framing overhead ({burst_format_overhead*100:.1f}%)
                    Final output rate: {burst_format_rate:.2f} bits/second
+                   
+                **Note**: The Nyquist-Shannon sampling theorem ensures perfect reconstruction of the original signal
+                when sampling at or above the Nyquist rate (2 × maximum frequency component).
                 """
             }
         except Exception as e:
@@ -467,129 +489,103 @@ class WirelessNetworkCalculator:
     @staticmethod
     def link_budget_calculation(params):
         """
-        Scenario 3: Link Budget Calculation
-        Computes transmitted power and received signal strength in flat environment
+        Scenario 3: Link Budget Calculation using provided formulas
+        Calculates transmitted and received power using the specific formulas:
+        1. Tₙ (dB) = 10 × log₁₀(T)
+        2. R (dB) = 10 × log₁₀(Data Rate in bps)
+        3. Pᵣ = M - 228.6 + Tₙ + N + R + Eb/No
+        4. Pₜ = Pᵣ + Lp + Lf + Lo + Lfm - Gt - Gr - Ar
+        5. Watts = 10^(dB / 10)
         """
         try:
-            # Input parameters
-            transmit_power_dbm = float(params.get('transmit_power_dbm', 30))
-            transmit_antenna_gain_db = float(params.get('transmit_antenna_gain_db', 15))
-            receive_antenna_gain_db = float(params.get('receive_antenna_gain_db', 10))
-            frequency_mhz = float(params.get('frequency_mhz', 2400))
-            distance_km = float(params.get('distance_km', 1))
-            cable_loss_db = float(params.get('cable_loss_db', 2))
-            misc_losses_db = float(params.get('misc_losses_db', 3))
-            atmospheric_loss_db = float(params.get('atmospheric_loss_db', 0))
+            # Extract parameters
+            lp_db = float(params.get('lp_db', 10.0))  # Path Loss
+            frequency_mhz = float(params.get('frequency_mhz', 1000.0))  # Frequency
+            gt_db = float(params.get('gt_db', 32.0))  # Transmitter Antenna Gain
+            gr_db = float(params.get('gr_db', 32.0))  # Receiver Antenna Gain
+            data_rate_kbps = float(params.get('data_rate_kbps', 1231.0))  # Data Rate
+            lf_db = float(params.get('lf_db', 1.0))  # Antenna Feed Line Loss
+            lo_db = float(params.get('lo_db', 1.0))  # Other Losses
+            lfm_db = float(params.get('lfm_db', 1.0))  # Fade Margin
+            ar_db = float(params.get('ar_db', 2.0))  # Receiver Amplifier Gain
+            n_db = float(params.get('n_db', 3.0))  # Noise Figure
+            noise_temp_k = float(params.get('noise_temp_k', 3.0))  # Noise Temperature
+            m_db = float(params.get('m_db', 1.0))  # Link Margin
+            ebno_db = float(params.get('ebno_db', 1.0))  # Eb/No
             
-            results = {}
+            # Step 1: Calculate Noise Temperature in dB
+            # Tₙ (dB) = 10 × log₁₀(T)
+            tn_db = 10 * math.log10(noise_temp_k)
             
-            # Convert units for calculations
-            frequency_hz = frequency_mhz * 1e6
-            distance_m = distance_km * 1000
+            # Step 2: Calculate Data Rate in dB
+            # R (dB) = 10 × log₁₀(Data Rate in bps)
+            data_rate_bps = data_rate_kbps * 1000  # Convert kbps to bps
+            r_db = 10 * math.log10(data_rate_bps)
             
-            # Free space path loss calculation
-            # FSPL (dB) = 32.45 + 20*log10(f_MHz) + 20*log10(d_km)
-            fspl_db = 32.45 + 20 * math.log10(frequency_mhz) + 20 * math.log10(distance_km)
-            results['fspl_db'] = fspl_db
+            # Step 3: Calculate Received Power
+            # Pᵣ = M - 228.6 + Tₙ + N + R + Eb/No
+            pr_db = m_db - 228.6 + tn_db + n_db + r_db + ebno_db
             
-            # Effective Isotropic Radiated Power (EIRP)
-            eirp_dbm = transmit_power_dbm + transmit_antenna_gain_db - cable_loss_db
-            results['eirp_dbm'] = eirp_dbm
+            # Step 4: Calculate Transmitted Power
+            # Pₜ = Pᵣ + Lp + Lf + Lo + Lfm - Gt - Gr - Ar
+            pt_db = pr_db + lp_db + lf_db + lo_db + lfm_db - gt_db - gr_db - ar_db
             
-            # Total path losses
-            total_path_loss_db = fspl_db + atmospheric_loss_db + misc_losses_db
-            results['total_path_loss_db'] = total_path_loss_db
+            # Step 5: Convert to Watts
+            # Watts = 10^(dB / 10)
+            pr_w = 10 ** (pr_db / 10)
+            pt_w = 10 ** (pt_db / 10)
             
-            # Received Signal Strength (RSS)
-            rss_dbm = eirp_dbm - total_path_loss_db + receive_antenna_gain_db
-            results['rss_dbm'] = rss_dbm
+            # Prepare results
+            results = {
+                'pr_db': pr_db,
+                'pt_db': pt_db,
+                'pr_w': pr_w,
+                'pt_w': pt_w,
+                'tn_db': tn_db,
+                'r_db': r_db,
+                'data_rate_bps': data_rate_bps,
+                'noise_temp_k': noise_temp_k,
+                'lp_db': lp_db,
+                'lf_db': lf_db,
+                'lo_db': lo_db,
+                'lfm_db': lfm_db,
+                'gt_db': gt_db,
+                'gr_db': gr_db,
+                'ar_db': ar_db,
+                'n_db': n_db,
+                'm_db': m_db,
+                'ebno_db': ebno_db
+            }
             
-            # Convert to watts for additional insight
-            transmit_power_w = 10 ** ((transmit_power_dbm - 30) / 10)
-            rss_w = 10 ** ((rss_dbm - 30) / 10)
-            results['transmit_power_w'] = transmit_power_w
-            results['rss_w'] = rss_w
-            
-            # Calculate link margins (using typical values)
-            typical_sensitivity_dbm = -95  # Typical receiver sensitivity
-            typical_fade_margin_db = 10    # Typical fade margin
-            
-            sensitivity_margin_db = rss_dbm - typical_sensitivity_dbm
-            fade_link_margin_db = sensitivity_margin_db - typical_fade_margin_db
-            
-            results['sensitivity_margin_db'] = sensitivity_margin_db
-            results['fade_link_margin_db'] = fade_link_margin_db
-            
-            # Link quality assessment
-            if fade_link_margin_db >= 15:
-                link_quality = "Excellent"
-                quality_color = "success"
-            elif fade_link_margin_db >= 10:
-                link_quality = "Good"
-                quality_color = "info"
-            elif fade_link_margin_db >= 5:
-                link_quality = "Adequate"
-                quality_color = "warning"
-            elif fade_link_margin_db >= 0:
-                link_quality = "Marginal"
-                quality_color = "warning"
-            else:
-                link_quality = "Insufficient"
-                quality_color = "danger"
-            
-            results['link_quality'] = link_quality
-            results['quality_color'] = quality_color
-            
-            # Maximum theoretical range (when RSS = sensitivity)
-            if rss_dbm > typical_sensitivity_dbm:
-                range_improvement_db = rss_dbm - typical_sensitivity_dbm
-                max_range_multiplier = 10 ** (range_improvement_db / 20)
-                max_range_km = distance_km * max_range_multiplier
-                results['max_theoretical_range_km'] = max_range_km
-            else:
-                results['max_theoretical_range_km'] = distance_km
-            
-            # Path loss breakdown
-            results['cable_loss_db'] = cable_loss_db
-            results['atmospheric_loss_db'] = atmospheric_loss_db
-            results['total_gains_db'] = transmit_antenna_gain_db + receive_antenna_gain_db
+            # Create simplified results for display
+            display_results = {
+                'power_received_db': pr_db,
+                'power_received_watts': pr_w,
+                'power_transmitted_db': pt_db,
+                'power_transmitted_watts': pt_w
+            }
             
             return {
                 'success': True,
-                'results': results,
+                'results': display_results,
                 'explanation': f"""
-                **Link Budget Analysis for {frequency_mhz} MHz at {distance_km} km:**
+                **Link Budget Calculation Results**
                 
-                **Transmitter Configuration:**
-                - Transmit Power: {transmit_power_dbm} dBm ({transmit_power_w*1000:.2f} mW)
-                - Antenna Gain: {transmit_antenna_gain_db} dBi
-                - Cable Loss: {cable_loss_db} dB
-                - **EIRP: {eirp_dbm:.2f} dBm**
+                **Calculation Steps:**
+                1. **Noise Temperature (dB):** Tₙ = 10 × log₁₀({noise_temp_k}) = {tn_db:.2f} dB
+                2. **Data Rate (dB):** R = 10 × log₁₀({data_rate_bps:.0f}) = {r_db:.2f} dB
+                3. **Received Power:** Pᵣ = {m_db} - 228.6 + {tn_db:.2f} + {n_db} + {r_db:.2f} + {ebno_db} = **{pr_db:.2f} dB**
+                4. **Transmitted Power:** Pₜ = {pr_db:.2f} + {lp_db} + {lf_db} + {lo_db} + {lfm_db} - {gt_db} - {gr_db} - {ar_db} = **{pt_db:.2f} dB**
+                5. **Power Conversion:** Watts = 10^(dB/10)
                 
-                **Propagation Analysis:**
-                - Free Space Path Loss: {fspl_db:.2f} dB
-                - Atmospheric Loss: {atmospheric_loss_db} dB
-                - Miscellaneous Losses: {misc_losses_db} dB
-                - **Total Path Loss: {total_path_loss_db:.2f} dB**
+                **Final Power Levels:**
+                - **Received Power:** {pr_db:.2f} dB = {pr_w:.2e} W
+                - **Transmitted Power:** {pt_db:.2f} dB = {pt_w:.2e} W
                 
-                **Receiver Performance:**
-                - Antenna Gain: {receive_antenna_gain_db} dBi
-                - **Received Signal Strength: {rss_dbm:.2f} dBm**
-                - Power Level: {rss_w*1e12:.2f} pW
-                
-                **Link Quality Assessment:**
-                - Sensitivity Margin: {sensitivity_margin_db:.2f} dB
-                - Link Margin (with fade): {fade_link_margin_db:.2f} dB
-                - **Overall Quality: {link_quality}**
-                - Max Range: {results['max_theoretical_range_km']:.2f} km
-                
-                **Key Insights:**
-                - Path loss increases 6 dB for every doubling of distance or frequency
-                - FSPL dominates the link budget at {frequency_mhz} MHz
-                - {"✅ Excellent link with high reliability" if fade_link_margin_db > 15 else "✅ Good link performance" if fade_link_margin_db > 10 else "⚠️ Adequate but consider improvements" if fade_link_margin_db > 5 else "⚠️ Marginal - increase power or reduce distance" if fade_link_margin_db > 0 else "❌ Insufficient link - major improvements required"}
-                - Total antenna gains: {results['total_gains_db']} dB
+                The link budget analysis shows the required transmitted power to achieve the desired received power level considering all system parameters including path loss, antenna gains, and various system losses.
                 """
             }
+            
         except Exception as e:
             app.logger.error(f"Link budget calculation error: {str(e)}")
             return {'success': False, 'error': str(e)}

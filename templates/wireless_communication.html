@@ -25,9 +25,14 @@
                         <h5><i class="fas fa-chart-line me-2"></i>Sampler</h5>
                         <div class="row">
                             <div class="col-md-6">
-                                <label class="form-label">Sampling Frequency (Hz)</label>
-                                <input type="number" class="form-control" id="sampling_frequency" value="8000" step="any">
-                                <small class="form-text text-muted">Rate at which analog signal is sampled</small>
+                                <label class="form-label">Signal Bandwidth (Hz)</label>
+                                <input type="number" class="form-control" id="signal_bandwidth" value="4000" step="any">
+                                <small class="form-text text-muted">Maximum frequency component of the input signal</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Nyquist Rate (Hz)</label>
+                                <input type="number" class="form-control" id="nyquist_rate" readonly>
+                                <small class="form-text text-muted">Minimum sampling rate = 2 × Bandwidth</small>
                             </div>
                         </div>
                     </div>
@@ -112,6 +117,7 @@
                 <div class="formula-box">
                     <strong>Processing Chain:</strong><br><br>
                     <strong>1. Sampler:</strong><br>
+                    f<sub>s</sub> = 2 × B (Nyquist Rate)<br>
                     Rate = f<sub>s</sub> (Hz)<br><br>
                     
                     <strong>2. Quantizer:</strong><br>
@@ -134,7 +140,7 @@
                 <div class="mt-3">
                     <h6>Typical Values:</h6>
                     <small>
-                        • Audio: 8 kHz sampling<br>
+                        • Audio signal: 4 kHz bandwidth → 8 kHz Nyquist rate<br>
                         • 8-bit quantization: 256 levels<br>
                         • LTE coding rate: 1/3, 1/2, 2/3<br>
                         • Frame overhead: 5-15%
@@ -154,13 +160,31 @@
 
 {% block scripts %}
 <script>
+// Calculate Nyquist rate automatically when bandwidth changes
+document.getElementById('signal_bandwidth').addEventListener('input', function() {
+    const bandwidth = parseFloat(this.value) || 0;
+    const nyquistRate = 2 * bandwidth;
+    document.getElementById('nyquist_rate').value = nyquistRate;
+});
+
+// Initialize Nyquist rate on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const bandwidth = parseFloat(document.getElementById('signal_bandwidth').value) || 0;
+    const nyquistRate = 2 * bandwidth;
+    document.getElementById('nyquist_rate').value = nyquistRate;
+});
+
 document.getElementById('calculationForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     showLoading('calculateBtn');
     
+    const bandwidth = parseFloat(document.getElementById('signal_bandwidth').value);
+    const sampling_frequency = 2 * bandwidth; // Nyquist rate
+    
     const formData = {
-        sampling_frequency: parseFloat(document.getElementById('sampling_frequency').value),
+        signal_bandwidth: bandwidth,
+        sampling_frequency: sampling_frequency,
         quantization_levels: parseInt(document.getElementById('quantization_levels').value),
         source_coding_efficiency: parseFloat(document.getElementById('source_coding_efficiency').value),
         channel_coding_rate: parseFloat(document.getElementById('channel_coding_rate').value),
