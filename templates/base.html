@@ -271,7 +271,12 @@
             document.querySelector('.loading-spinner').style.display = 'none';
         }
 
-        function displayResults(results, explanation) {
+        function displayResults(results, explanation, scenario = '', parameters = {}) {
+            // Store global variables for AI chat
+            currentResults = results;
+            currentScenario = scenario;
+            currentParameters = parameters;
+            
             const resultsDiv = document.getElementById('results');
             let html = '<div class="result-card"><h4><i class="fas fa-chart-line me-2"></i>Calculation Results</h4>';
             

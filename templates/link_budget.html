@@ -174,32 +174,134 @@
 
 {% block scripts %}
 <script>
+// Helper function to set global variables for AI chat
+function setLinkBudgetGlobalVariables(formData, results) {
+    currentScenario = 'link_budget';
+    currentParameters = formData;
+    currentResults = results;
+}
+
+// Custom display function with AI integration
+function displayLinkBudgetResults(results, explanation) {
+    const resultsDiv = document.getElementById('results');
+    
+    resultsDiv.innerHTML = `
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4><i class="fas fa-chart-line me-2"></i>Link Budget Results</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Main Results Table -->
+                    <div class="col-md-6 mb-3">
+                        <div class="result-card p-3 rounded" style="background: linear-gradient(135deg, #155724, #28a745); color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <h6><i class="fas fa-signal me-2"></i>Power Results</h6>
+                            <div class="row mb-2">
+                                <div class="col-7"><strong>Received Power:</strong></div>
+                                <div class="col-5">${results.pr_db.toFixed(2)} dB</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-7"><strong>Transmitted Power:</strong></div>
+                                <div class="col-5">${results.pt_db.toFixed(2)} dB</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-7"><strong>Pr (Watts):</strong></div>
+                                <div class="col-5">${results.pr_w.toExponential(2)} W</div>
+                            </div>
+                            <div class="row mb-0">
+                                <div class="col-7"><strong>Pt (Watts):</strong></div>
+                                <div class="col-5">${results.pt_w.toExponential(2)} W</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Intermediate Calculations -->
+                    <div class="col-md-6 mb-3">
+                        <div class="result-card p-3 rounded" style="background: linear-gradient(135deg, #0d7377, #17a2b8); color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <h6><i class="fas fa-calculator me-2"></i>Intermediate Values</h6>
+                            <div class="row mb-2">
+                                <div class="col-7"><strong>Noise Temp (Tn):</strong></div>
+                                <div class="col-5">${results.tn_db.toFixed(2)} dB</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-7"><strong>Data Rate (R):</strong></div>
+                                <div class="col-5">${results.r_db.toFixed(2)} dB</div>
+                            </div>
+                            <div class="row mb-0">
+                                <div class="col-7"><strong>Data Rate:</strong></div>
+                                <div class="col-5">${results.data_rate_bps.toExponential(1)} bps</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Formula Steps -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle me-2"></i>Calculation Steps</h6>
+                            <div class="formula-verification">
+                                <div class="mb-2"><strong>1. Noise Temperature:</strong><br><code class="text-primary">Tₙ = 10 × log₁₀(${results.noise_temp_k}) = ${results.tn_db.toFixed(2)} dB</code></div>
+                                <div class="mb-2"><strong>2. Data Rate:</strong><br><code class="text-primary">R = 10 × log₁₀(${results.data_rate_bps.toExponential(1)}) = ${results.r_db.toFixed(2)} dB</code></div>
+                                <div class="mb-2"><strong>3. Received Power:</strong><br><code class="text-primary">Pᵣ = ${results.m_db} - 228.6 + ${results.tn_db.toFixed(2)} + ${results.n_db} + ${results.r_db.toFixed(2)} + ${results.ebno_db} = ${results.pr_db.toFixed(2)} dB</code></div>
+                                <div class="mb-0"><strong>4. Transmitted Power:</strong><br><code class="text-primary">Pₜ = ${results.pr_db.toFixed(2)} + ${results.lp_db} + ${results.lf_db} + ${results.lo_db} + ${results.lfm_db} - ${results.gt_db} - ${results.gr_db} - ${results.ar_db} = ${results.pt_db.toFixed(2)} dB</code></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Add AI explanation if it exists -->
+        ${explanation ? `
+            <div class="explanation-box">
+                <h5><i class="fas fa-robot me-2 text-primary"></i>Gemini AI Explanation</h5>
+                <div class="ai-content">${formatAIContent(explanation)}</div>
+            </div>
+        ` : ''}
+        
+        <!-- Add AI Chat Interface -->
+        ${createAIChatInterface()}
+    `;
+    
+    // Initialize AI chat after results are displayed
+    initializeAIChat();
+    
+    // Show the results
+    resultsDiv.style.display = 'block';
+}
+
+// Form submission handler
 document.getElementById('calculationForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
-    showLoading('calculateBtn');
-    
-    const formData = {
-        lp_db: parseFloat(document.getElementById('lp_db').value),
-        frequency_mhz: parseFloat(document.getElementById('frequency_mhz').value),
-        gt_db: parseFloat(document.getElementById('gt_db').value),
-        gr_db: parseFloat(document.getElementById('gr_db').value),
-        data_rate_kbps: parseFloat(document.getElementById('data_rate_kbps').value),
-        lf_db: parseFloat(document.getElementById('lf_db').value),
-        lo_db: parseFloat(document.getElementById('lo_db').value),
-        lfm_db: parseFloat(document.getElementById('lfm_db').value),
-        ar_db: parseFloat(document.getElementById('ar_db').value),
-        n_db: parseFloat(document.getElementById('n_db').value),
-        noise_temp_k: parseFloat(document.getElementById('noise_temp_k').value),
-        m_db: parseFloat(document.getElementById('m_db').value),
-        ebno_db: parseFloat(document.getElementById('ebno_db').value)
-    };
-    
-    // Store for AI chat
-    currentScenario = 'link_budget';
-    currentParameters = formData;
-    
     try {
+        showLoading('calculateBtn');
+        
+        const formData = {
+            lp_db: parseFloat(document.getElementById('lp_db').value),
+            frequency_mhz: parseFloat(document.getElementById('frequency_mhz').value),
+            gt_db: parseFloat(document.getElementById('gt_db').value),
+            gr_db: parseFloat(document.getElementById('gr_db').value),
+            data_rate_kbps: parseFloat(document.getElementById('data_rate_kbps').value),
+            lf_db: parseFloat(document.getElementById('lf_db').value),
+            lo_db: parseFloat(document.getElementById('lo_db').value),
+            lfm_db: parseFloat(document.getElementById('lfm_db').value),
+            ar_db: parseFloat(document.getElementById('ar_db').value),
+            n_db: parseFloat(document.getElementById('n_db').value),
+            noise_temp_k: parseFloat(document.getElementById('noise_temp_k').value),
+            m_db: parseFloat(document.getElementById('m_db').value),
+            ebno_db: parseFloat(document.getElementById('ebno_db').value)
+        };
+        
+        // Basic validation
+        for (const [key, value] of Object.entries(formData)) {
+            if (isNaN(value) || value === null || value === undefined) {
+                displayError(`Invalid value for ${key}: ${value}`);
+                return;
+            }
+        }
+        
         const response = await fetch('/calculate/link_budget', {
             method: 'POST',
             headers: {
@@ -211,10 +313,13 @@ document.getElementById('calculationForm').addEventListener('submit', async func
         const result = await response.json();
         
         if (result.success) {
-            currentResults = result.results;
-            displayResults(result.results, result.explanation);
+            // Set global variables for AI chat BEFORE displaying results
+            setLinkBudgetGlobalVariables(formData, result.results);
+            
+            // Use our custom display function with AI integration
+            displayLinkBudgetResults(result.results, result.explanation);
         } else {
-            displayError(result.error);
+            displayError(result.error || 'Calculation failed');
         }
     } catch (error) {
         displayError('Network error: ' + error.message);
@@ -223,4 +328,41 @@ document.getElementById('calculationForm').addEventListener('submit', async func
     }
 });
 </script>
+
+<style>
+.formula-verification {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    border: 1px solid #dee2e6;
+}
+
+.formula-verification code {
+    background: #e9ecef;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    display: block;
+    margin-top: 0.25rem;
+    word-wrap: break-word;
+}
+
+.result-card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.result-card:hover {
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .result-card {
+        margin-bottom: 1rem;
+    }
+    
+    .col-md-6 {
+        margin-bottom: 1rem;
+    }
+}
+</style>
 {% endblock %}

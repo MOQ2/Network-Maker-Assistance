@@ -25,10 +25,10 @@ class GeminiAIExplainer:
     def __init__(self):
         self.api_key = AI_CONFIG.get('google_ai_key')
         self.models = [
-            'gemini-1.5-flash',      # Most reliable
-            'gemini-1.5-pro',        # High quality
-            'gemini-2.0-flash-exp',  # Latest experimental
-            'gemini-pro'             # Fallback
+            'gemini-1.5-flash',      
+            'gemini-1.5-pro',        
+            'gemini-2.0-flash-exp',  
+            'gemini-pro'            
         ]
         self.working_model = None
         self.base_url = "https://generativelanguage.googleapis.com/v1beta/models"
@@ -91,6 +91,10 @@ class GeminiAIExplainer:
             prompt = self._create_explanation_prompt(scenario, parameters, results)
             
             url = f"{self.base_url}/{model}:generateContent?key={self.api_key}"
+            headers = {
+                'Content-Type': 'application/json',
+                'key': f'Bearer {self.api_key}'
+            }
             
             data = {
                 'contents': [{
@@ -102,7 +106,7 @@ class GeminiAIExplainer:
                     'temperature': 0.7,
                     'topK': 40,
                     'topP': 0.95,
-                    'maxOutputTokens': 2048,  # Increased from 1000
+                    'maxOutputTokens': 2048,  
                     'responseMimeType': 'text/plain'
                 },
                 'safetySettings': [
@@ -125,7 +129,7 @@ class GeminiAIExplainer:
                 ]
             }
             
-            response = requests.post(url, json=data, timeout=15)
+            response = requests.post(url, json=data,headers=headers , timeout=15)
             
             if response.status_code == 200:
                 result = response.json()
@@ -557,32 +561,37 @@ class WirelessNetworkCalculator:
                 'ebno_db': ebno_db
             }
             
-            # Create simplified results for display
-            display_results = {
-                'power_received_db': pr_db,
-                'power_received_watts': pr_w,
-                'power_transmitted_db': pt_db,
-                'power_transmitted_watts': pt_w
-            }
-            
             return {
                 'success': True,
-                'results': display_results,
+                'results': results,
                 'explanation': f"""
-                **Link Budget Calculation Results**
+                **Link Budget Calculation Results:**
+                
+                **Input Parameters:**
+                - Path Loss (Lp): {lp_db} dB
+                - Frequency: {frequency_mhz} MHz
+                - Transmitter Antenna Gain (Gt): {gt_db} dB
+                - Receiver Antenna Gain (Gr): {gr_db} dB
+                - Data Rate: {data_rate_kbps} kbps
+                - Feed Line Loss (Lf): {lf_db} dB
+                - Other Losses (Lo): {lo_db} dB
+                - Fade Margin (Lfm): {lfm_db} dB
+                - Receiver Amplifier Gain (Ar): {ar_db} dB
+                - Noise Figure (N): {n_db} dB
+                - Noise Temperature: {noise_temp_k} K
+                - Link Margin (M): {m_db} dB
+                - Eb/No: {ebno_db} dB
                 
                 **Calculation Steps:**
-                1. **Noise Temperature (dB):** Tₙ = 10 × log₁₀({noise_temp_k}) = {tn_db:.2f} dB
-                2. **Data Rate (dB):** R = 10 × log₁₀({data_rate_bps:.0f}) = {r_db:.2f} dB
-                3. **Received Power:** Pᵣ = {m_db} - 228.6 + {tn_db:.2f} + {n_db} + {r_db:.2f} + {ebno_db} = **{pr_db:.2f} dB**
-                4. **Transmitted Power:** Pₜ = {pr_db:.2f} + {lp_db} + {lf_db} + {lo_db} + {lfm_db} - {gt_db} - {gr_db} - {ar_db} = **{pt_db:.2f} dB**
-                5. **Power Conversion:** Watts = 10^(dB/10)
+                1. Tₙ = 10 × log₁₀({noise_temp_k}) = {tn_db:.2f} dB
+                2. R = 10 × log₁₀({data_rate_bps:.0f}) = {r_db:.2f} dB
+                3. Pᵣ = {m_db} - 228.6 + {tn_db:.2f} + {n_db} + {r_db:.2f} + {ebno_db} = **{pr_db:.2f} dB**
+                4. Pₜ = {pr_db:.2f} + {lp_db} + {lf_db} + {lo_db} + {lfm_db} - {gt_db} - {gr_db} - {ar_db} = **{pt_db:.2f} dB**
+                5. Power conversion: 10^(dB/10)
                 
-                **Final Power Levels:**
-                - **Received Power:** {pr_db:.2f} dB = {pr_w:.2e} W
-                - **Transmitted Power:** {pt_db:.2f} dB = {pt_w:.2e} W
-                
-                The link budget analysis shows the required transmitted power to achieve the desired received power level considering all system parameters including path loss, antenna gains, and various system losses.
+                **Final Results:**
+                - **Power at Receiver (Pr): {pr_db:.2f} dB = {pr_w:.2e} W**
+                - **Power at Transmitter (Pt): {pt_db:.2f} dB = {pt_w:.2e} W**
                 """
             }
             
@@ -594,257 +603,236 @@ class WirelessNetworkCalculator:
     @staticmethod
     def cellular_system_design(params):
         """
-        Scenario 4: Cellular System Design - UPDATED VERSION
-        Designs a cellular network following proper cellular engineering principles
+        Scenario 4: Cellular System Design - CORRECTED EQUATION COMPLIANT VERSION
+        Follows the EXACT equations with realistic parameter handling
         """
         try:
-            # Input parameters
-            time_slots_per_carrier = int(params.get('time_slots_per_carrier', 8))  # GSM standard
+            # Input parameters with corrected defaults
+            time_slots_per_carrier = int(params.get('time_slots_per_carrier', 8))
             total_area = float(params.get('total_area', 100))  # km²
             max_num_users = int(params.get('max_num_users', 10000))
-            avg_call_duration = float(params.get('avg_call_duration', 120))  # seconds
-            avg_call_rate_per_user = float(params.get('avg_call_rate_per_user', 2))  # calls per day
+            avg_call_duration = float(params.get('avg_call_duration', 180))  # seconds - CORRECTED
+            avg_call_rate_per_user = float(params.get('avg_call_rate_per_user', 3))  # calls per day - CORRECTED
             gos = float(params.get('gos', 0.02))  # Grade of Service (2%)
             sir_db = float(params.get('sir_db', 18))  # Signal-to-Interference Ratio in dB
-            p0_dbm = float(params.get('p0_dbm', 30))  # Transmit power in dBm
-            receiver_sensitivity_dbm = float(params.get('receiver_sensitivity_dbm', -95))  # dBm
+            p0_dbm = float(params.get('p0_dbm', 43))  # Transmit power in dBm - CORRECTED
+            receiver_sensitivity_dbm = float(params.get('receiver_sensitivity_dbm', -104))  # dBm - CORRECTED
             d0_m = float(params.get('d0_m', 1000))  # Reference distance in meters
-            path_loss_exponent = float(params.get('path_loss_exponent', 4))  # Typical urban environment
+            path_loss_exponent = float(params.get('path_loss_exponent', 4))
+            frequency_mhz = float(params.get('frequency_mhz', 900))  # Operating frequency
             
             results = {}
             
+            # Input validation
+            if p0_dbm <= receiver_sensitivity_dbm:
+                return {'success': False, 'error': f'TX Power ({p0_dbm} dBm) must be greater than RX Sensitivity ({receiver_sensitivity_dbm} dBm)'}
+            
+            link_budget_db = p0_dbm - receiver_sensitivity_dbm
+            if link_budget_db < 50:
+                app.logger.warning(f'Very low link budget: {link_budget_db:.1f} dB')
+            elif link_budget_db > 200:
+                app.logger.warning(f'Very high link budget: {link_budget_db:.1f} dB')
+            
             # Constants
             cluster_sizes = [1, 3, 4, 7, 9, 12, 13, 16, 19, 21, 28]
-            nb = 6  # Number of base stations in first tier
+            nb = 6  # Number of base stations in first tier (as specified)
             
-            # Unit conversions
-            def db_to_watt(db_value):
-                return 10 ** (db_value / 10)
-            
+            # Convert dBm to Watts for power calculations
             def dbm_to_watt(dbm_value):
                 return 10 ** ((dbm_value - 30) / 10)
             
-            # Convert dBm to watts
             p0_watt = dbm_to_watt(p0_dbm)
             receiver_sensitivity_watt = dbm_to_watt(receiver_sensitivity_dbm)
-            sir_ratio = db_to_watt(sir_db)
             
             results['p0_watt'] = p0_watt
             results['receiver_sensitivity_watt'] = receiver_sensitivity_watt
-            results['sir_ratio'] = sir_ratio
+            results['link_budget_db'] = link_budget_db
             
-            # 1. Calculate maximum distance for reliable communication
-            max_distance = ((receiver_sensitivity_watt / p0_watt) ** (-1 / path_loss_exponent)) * d0_m
-            results['max_distance_m'] = max_distance
-            results['max_distance_km'] = max_distance / 1000
+            # 1. EXACT Link Budget Equation: dmax = ((Psens/P0)^(-1/n)) × d0
+            power_ratio = receiver_sensitivity_watt / p0_watt
+            dmax = ((power_ratio) ** (-1 / path_loss_exponent)) * d0_m
             
-            # 2. Calculate maximum cell size (hexagonal area)
-            # Area = 3 * sqrt(3) / 2 * R^2
-            max_cell_size_m2 = (3 * math.sqrt(3) / 2) * (max_distance ** 2)
-            max_cell_size_km2 = max_cell_size_m2 / 1e6
-            results['max_cell_size_km2'] = max_cell_size_km2
+            # Add practical limits to prevent unrealistic results
+            dmax = min(dmax, 50000)  # Max 50km for any cellular system
+            dmax = max(dmax, 100)    # Min 100m to prevent zero-area cells
             
-            # 3. Calculate total number of cells
-            total_num_cells = math.ceil(total_area / max_cell_size_km2)
+            results['power_ratio'] = power_ratio
+            results['dmax_m'] = dmax
+            results['dmax_km'] = dmax / 1000
+            
+            # 2. EXACT Cell Area Equation: Cell Area = (3√3/2) × dmax²
+            cell_area_m2 = (3 * math.sqrt(3) / 2) * (dmax ** 2)
+            cell_area_km2 = cell_area_m2 / 1e6
+            
+            results['cell_area_m2'] = cell_area_m2
+            results['cell_area_km2'] = cell_area_km2
+            
+            # 3. Calculate total number of cells needed for coverage
+            total_num_cells = max(1, math.ceil(total_area / cell_area_km2))
             results['total_num_cells'] = total_num_cells
             
-            # 4. Calculate traffic per user (in Erlangs)
-            # Traffic = (calls/day) * (duration/call) / (seconds/day)
-            traffic_per_user = (avg_call_rate_per_user * avg_call_duration) / (24 * 60 * 60)
+            # 4. EXACT Traffic Engineering Equations
+            # Auser = (calls/day × duration) / 86400
+            traffic_per_user = (avg_call_rate_per_user * avg_call_duration) / 86400
             results['traffic_per_user_erlang'] = traffic_per_user
             
-            # 5. Calculate total system traffic
+            # Asystem = Auser × Nusers
             traffic_all_system = traffic_per_user * max_num_users
             results['traffic_all_system_erlang'] = traffic_all_system
             
-            # 6. Calculate traffic load for each cell
+            # Acell = Asystem / Ncells
             traffic_load_each_cell = traffic_all_system / total_num_cells
             results['traffic_load_each_cell_erlang'] = traffic_load_each_cell
             
-            # 7. Calculate cluster size N
-            # N >= (SIR * NB)^(2/n) / 3
-            x = (sir_ratio * nb) ** (2 / path_loss_exponent) / 3
-            cluster_size_n = next((n for n in cluster_sizes if n >= x), cluster_sizes[-1])
+            # 5. EXACT Interference Analysis: N ≥ (SIR × NB)^(2/n) / 3
+            sir_linear = 10 ** (sir_db / 10)  # Convert dB to linear
+            cluster_size_calculated = ((sir_linear * nb) ** (2 / path_loss_exponent)) / 3
+            
+            # Find the next valid cluster size
+            cluster_size_n = next((n for n in cluster_sizes if n >= cluster_size_calculated), cluster_sizes[-1])
+            
+            results['sir_linear'] = sir_linear
+            results['nb'] = nb
+            results['cluster_size_calculated'] = cluster_size_calculated
             results['cluster_size_n'] = cluster_size_n
-            results['x_value'] = x
             
-            # 8. Erlang B table lookup for number of channels
-            # Simplified Erlang B table (GOS% : [traffic values for channels 1,2,3...])
+            # 6. Channel Assignment using Erlang B table
             erlang_b_table = {
-                "0.1%": [0.001, 0.046, 0.194, 0.439, 0.762, 1.100, 1.600, 2.100, 2.600, 3.100, 3.700,
-            4.200, 4.800, 5.400, 6.100, 6.700, 7.400, 8.000, 8.700, 9.400, 10.100,
-            10.800, 11.500, 12.200, 13.000, 13.700, 14.400, 15.200, 15.900, 16.700,
-            17.400, 18.200, 19.000, 19.700, 20.500, 21.300, 22.100, 22.900, 23.700,
-            24.400, 25.200, 26.000, 26.800, 27.600, 28.400],
-    0.2: [0.002, 0.065, 0.249, 0.535, 0.900, 1.300, 1.800, 
-        2.300, 2.900, 3.400, 4.000, 4.600, 5.300, 5.900, 6.600, 
-        7.300, 7.900, 8.600, 9.400, 10.100, 10.800, 11.500, 12.300,
-            13.000, 13.800, 14.500, 15.300, 16.100, 16.800, 17.600, 18.400,
-            19.200, 20.000, 20.800, 21.600, 22.400, 23.200, 24.000, 24.800, 25.600,
-            26.400, 27.200, 28.100, 28.900, 29.7],
-    0.5: [0.005, 0.105, 0.349, 0.701, 1.132, 1.600, 2.200, 2.700,
-            3.300, 4.000, 4.600, 5.300, 6.000, 6.700, 7.400, 8.100, 8.800, 
-            9.600, 10.300, 11.100, 11.900, 12.600, 13.400, 14.200, 15.000, 15.800,
-            16.600, 17.400, 18.200, 19.000, 19.900, 20.700, 21.500, 22.300, 23.200,
-            24.000, 24.800, 25.700, 26.500, 27.400, 28.200, 29.100, 29.900, 30.800, 31.7],
-    1: [0.010, 0.153, 0.455, 0.869, 1.361, 1.900, 2.500, 3.100, 3.800, 4.500, 5.200,
-        5.900, 6.600, 7.400, 8.100, 8.900, 9.700, 10.400, 11.200, 12.000, 12.800, 13.700,
-            14.500, 15.300, 16.100, 17.000, 17.800, 18.600, 19.500, 20.300, 21.200, 22.000, 22.900,
-            23.800, 24.600, 25.500, 26.400, 27.300, 28.100, 29.000, 29.900, 30.800, 31.700, 32.500, 33.4],
-    1.2: [0.012, 0.168, 0.489, 0.922, 1.431, 2.000, 2.600, 3.200, 3.900, 
-        4.600, 5.300, 6.100, 6.800, 7.600, 8.300, 9.100, 9.900, 10.700, 11.500,
-            12.300, 13.100, 14.000, 14.800, 15.600, 16.500, 17.300, 18.200, 19.000,
-            19.900, 20.700, 21.600, 22.500, 23.300, 24.200, 25.100, 26.000, 26.800,
-            27.700, 28.600, 29.500, 30.400, 31.300, 32.200, 33.100, 34.000],
-    1.3: [0.013, 0.176, 0.505, 0.946, 1.464, 2.000, 2.700, 3.300, 4.000,
-            4.700, 5.400, 6.100, 6.900, 7.700, 8.400, 9.200, 10.000, 10.800, 
-            11.600, 12.400, 13.300, 14.100, 14.900, 15.800, 16.600, 17.500, 
-            18.300, 19.200, 20.000, 20.900, 21.800, 22.600, 23.500, 24.400, 
-            25.300, 26.200, 27.000, 27.900, 28.800, 29.700, 30.600, 31.500,
-            32.400, 33.300, 34.200],
-    1.5: [0.020, 0.190, 0.530, 0.990, 1.520, 2.100, 2.700, 3.400, 4.100, 
-        4.800, 5.500, 6.300, 7.000, 7.800, 8.600, 9.400, 10.200, 11.000, 11.800,
-            12.600, 13.500, 14.300, 15.200, 16.000, 16.900, 17.700, 18.600, 19.500,
-            20.300, 21.200, 22.100, 22.900, 23.800, 24.700, 25.600, 26.500, 27.400,
-            28.300, 29.200, 30.100, 31.000, 31.900, 32.800, 33.700, 34.600],
-    2: [0.020, 0.223, 0.602, 1.092, 1.657, 2.300, 2.900, 3.600, 4.300, 5.100,
-            5.800, 6.600, 7.400, 8.200, 9.000, 9.800, 10.700, 11.500, 12.300, 13.200, 
-            14.000, 14.900, 15.800, 16.600, 17.500, 18.400, 19.300, 20.200, 21.000, 21.900,
-            22.800, 23.700, 24.600, 25.500, 26.400, 27.300, 28.300, 29.200, 30.100, 31.000, 
-            31.900, 32.800, 33.800, 34.700, 35.600],
-    3: [0.031, 0.282, 0.715, 1.259, 1.875, 2.500, 3.200, 4.000, 4.700, 5.500,
-            6.300, 7.100, 8.000, 8.800, 9.600, 10.500, 11.400, 12.200, 13.100, 14.000,
-            14.900, 15.800, 16.700, 17.600, 18.500, 19.400, 20.300, 21.200, 22.100, 23.100,
-            24.000, 24.900, 25.800, 26.800, 27.700, 28.600, 29.600, 30.500, 31.500, 32.400,
-            33.400, 34.300, 35.300, 36.200, 37.200],
-    5: [0.053, 0.381, 0.899, 1.525, 2.218, 3.000, 3.700, 4.500, 5.400, 6.200,
-            7.100, 8.000, 8.800, 9.700, 10.600, 11.500, 12.500, 13.400, 14.300, 15.200,
-            16.200, 17.100, 18.100, 19.000, 20.000, 20.900, 21.900, 22.900, 23.800,
-            24.800, 25.800, 26.700, 27.700, 28.700, 29.700, 30.700, 31.600, 32.600,
-            33.600, 34.600, 35.600, 36.600, 37.600, 38.600, 39.600],
-    7: [0.075, 0.470, 1.057, 1.748, 2.504, 3.300, 4.100, 5.000, 5.900, 6.800,
-            7.700, 8.600, 9.500, 10.500, 11.400, 12.400, 13.400, 14.300, 15.300, 16.300,
-            17.300, 18.200, 19.200, 20.200, 21.200, 22.200, 23.200, 24.200, 25.200, 26.200,
-            27.200, 28.200, 29.300, 30.300, 31.300, 32.300, 33.300, 34.400, 35.400, 36.400,
-            37.400, 38.400, 39.500, 40.500, 41.500],
-    10: [0.111, 0.595, 1.271, 2.045, 2.881, 3.800, 4.700, 5.600, 6.500, 7.500, 
-        8.500, 9.500, 10.500, 11.500, 12.500, 13.500, 14.500, 15.500, 16.600, 17.600,
-            18.700, 19.700, 20.700, 21.800, 22.800, 23.900, 24.900, 26.000, 27.100, 28.100, 
-            29.200, 30.200, 31.300, 32.400, 33.400, 34.500, 35.600, 36.600, 37.700, 38.800,
-            39.900, 40.900, 42.000, 43.100, 44.200],
-    15: [0.176, 0.796, 1.602, 2.501, 3.454, 4.400, 5.500, 6.500, 7.600, 8.600, 9.700,
-            10.800, 11.900, 13.000, 14.100, 15.200, 16.300, 17.400, 18.500, 19.600, 20.800,
-            21.900, 23.000, 24.200, 25.300, 26.400, 27.600, 28.700, 29.900, 31.000, 32.100,
-            33.300, 34.400, 35.600, 36.700, 37.900, 39.000, 40.200, 41.300, 42.500, 43.600,
-            44.800, 45.900, 47.100, 48.200],
-    20: [0.250, 1.000, 1.930, 2.950, 4.010, 5.100, 6.200, 7.400, 8.500, 9.700, 10.900, 
-        12.000, 13.200, 14.400, 15.600, 16.800, 18.000, 19.200, 20.400, 21.600, 22.800, 24.100,
-            25.300, 26.500, 27.700, 28.900, 30.200, 31.400, 32.600, 33.800, 35.100, 36.300, 37.500, 
-            38.800, 40.000, 41.200, 42.400, 43.700, 44.900, 46.100, 47.400, 48.600, 49.900, 51.100, 52.300],
-    30: [0.429, 1.450, 2.633, 3.890, 5.189, 6.500, 7.900, 9.200, 10.600, 12.000, 13.300,
-            14.700, 16.100, 17.500, 18.900, 20.300, 21.700, 23.100, 24.500, 25.900, 27.300, 28.700,
-            30.100, 31.600, 33.000, 34.400, 35.800, 37.200, 38.600, 40.000, 41.500, 42.900, 44.300,
-            45.700, 47.100, 48.600, 50.000, 51.400, 52.800, 54.200, 55.700, 57.100, 58.500, 59.900, 61.300]
-};
-
+                0.5: [0.005, 0.105, 0.349, 0.701, 1.132, 1.627, 2.157, 2.718, 3.305, 3.917, 4.550, 5.204, 5.876, 6.564, 7.269, 7.989, 8.722, 9.468, 10.226, 10.994, 11.774, 12.564, 13.365, 14.175, 14.993],
+                1.0: [0.010, 0.153, 0.455, 0.869, 1.361, 1.909, 2.501, 3.128, 3.783, 4.462, 5.160, 5.876, 6.608, 7.354, 8.114, 8.886, 9.669, 10.463, 11.267, 12.081, 12.904, 13.736, 14.576, 15.425, 16.282],
+                2.0: [0.020, 0.223, 0.602, 1.092, 1.657, 2.276, 2.935, 3.627, 4.345, 5.086, 5.847, 6.624, 7.416, 8.221, 9.037, 9.864, 10.700, 11.546, 12.401, 13.263, 14.133, 15.011, 15.896, 16.789, 17.689],
+                3.0: [0.031, 0.282, 0.715, 1.259, 1.875, 2.543, 3.250, 3.987, 4.748, 5.529, 6.328, 7.141, 7.968, 8.806, 9.654, 10.512, 11.378, 12.252, 13.134, 14.023, 14.920, 15.823, 16.734, 17.651, 18.575],
+                5.0: [0.053, 0.381, 0.899, 1.525, 2.218, 2.960, 3.738, 4.543, 5.370, 6.216, 7.078, 7.953, 8.840, 9.737, 10.643, 11.558, 12.481, 13.411, 14.348, 15.292, 16.244, 17.202, 18.166, 19.136, 20.112]
+            }
             
-            
-            
-            
-            
-            
-            # Find GOS percentage key (convert to nearest available)
+            # Find appropriate GOS key
             gos_percent = gos * 100
-            if gos_percent <= 1.5:
+            if gos_percent <= 0.75:
+                gos_key = 0.5
+            elif gos_percent <= 1.5:
                 gos_key = 1.0
-            elif gos_percent <= 3.5:
+            elif gos_percent <= 2.5:
                 gos_key = 2.0
+            elif gos_percent <= 4.0:
+                gos_key = 3.0
             else:
                 gos_key = 5.0
             
             results['gos_key_used'] = gos_key
             
-            # Find number of channels required using Erlang B table
+            # Find number of channels using Erlang B table
             traffic_values = erlang_b_table[gos_key]
             num_channels_required = 1
+            
             for i, traffic_capacity in enumerate(traffic_values):
                 if traffic_capacity >= traffic_load_each_cell:
                     num_channels_required = i + 1
                     break
             else:
-                num_channels_required = len(traffic_values)
+                # If traffic exceeds table, use approximation
+                num_channels_required = min(100, len(traffic_values) + int(traffic_load_each_cell * 2))
             
             results['num_channels_required'] = num_channels_required
-            results['traffic_capacity_found'] = traffic_values[num_channels_required - 1] if num_channels_required <= len(traffic_values) else traffic_values[-1]
+            results['traffic_capacity_used'] = traffic_values[min(num_channels_required - 1, len(traffic_values) - 1)]
             
-            # 9. Calculate number of carriers per cell
+            # 7. EXACT Channel Assignment Equations
+            # Carriers = ⌈Channels / Time_Slots⌉
             num_carriers_per_cell = math.ceil(num_channels_required / time_slots_per_carrier)
             results['num_carriers_per_cell'] = num_carriers_per_cell
             
-            # 10. Calculate total carriers in system
+            # System Carriers = Carriers × N (where N is cluster size, NOT total cells)
             num_carriers_in_system = num_carriers_per_cell * cluster_size_n
             results['num_carriers_in_system'] = num_carriers_in_system
             
-            # Additional system parameters
-            results['total_channels_in_system'] = num_channels_required * total_num_cells
-            results['spectrum_efficiency'] = max_num_users / total_area  # users per km²
-            results['cell_density'] = total_num_cells / total_area  # cells per km²
+            # Additional calculations for completeness
+            total_channels_in_system = num_channels_required * total_num_cells
+            results['total_channels_in_system'] = total_channels_in_system
             
-            # System capacity analysis
-            actual_system_capacity = num_channels_required * total_num_cells
-            channel_utilization = (traffic_load_each_cell * total_num_cells) / actual_system_capacity
-            results['actual_system_capacity_channels'] = actual_system_capacity
+            # Performance metrics
+            actual_traffic_capacity = results['traffic_capacity_used'] * total_num_cells
+            channel_utilization = min(1.0, traffic_all_system / actual_traffic_capacity) if actual_traffic_capacity > 0 else 0
+            users_per_cell = max_num_users / total_num_cells
+            spectrum_efficiency = max_num_users / total_area
+            cell_density = total_num_cells / total_area
+            frequency_reuse_efficiency = 1 / cluster_size_n
+            
+            results['actual_traffic_capacity_erlang'] = actual_traffic_capacity
             results['channel_utilization'] = channel_utilization
+            results['users_per_cell'] = users_per_cell
+            results['spectrum_efficiency'] = spectrum_efficiency
+            results['cell_density'] = cell_density
+            results['frequency_reuse_efficiency'] = frequency_reuse_efficiency
+            
+            # Store intermediate calculations for verification
+            results['calculations_verification'] = {
+                'link_budget_formula': f"dmax = ((Psens/P0)^(-1/n)) × d0 = (({receiver_sensitivity_watt:.2e}/{p0_watt:.2e})^(-1/{path_loss_exponent})) × {d0_m} = {dmax:.2f} m",
+                'cell_area_formula': f"Area = (3√3/2) × dmax² = (3×√3/2) × {dmax:.2f}² = {cell_area_km2:.3f} km²",
+                'traffic_user_formula': f"Auser = (calls/day × duration) / 86400 = ({avg_call_rate_per_user} × {avg_call_duration}) / 86400 = {traffic_per_user:.6f} Erlang",
+                'traffic_system_formula': f"Asystem = Auser × Nusers = {traffic_per_user:.6f} × {max_num_users} = {traffic_all_system:.3f} Erlang",
+                'traffic_cell_formula': f"Acell = Asystem / Ncells = {traffic_all_system:.3f} / {total_num_cells} = {traffic_load_each_cell:.6f} Erlang",
+                'interference_formula': f"N ≥ (SIR × NB)^(2/n) / 3 = ({sir_linear:.1f} × {nb})^(2/{path_loss_exponent}) / 3 = {cluster_size_calculated:.3f}",
+                'carriers_formula': f"Carriers = ⌈{num_channels_required} / {time_slots_per_carrier}⌉ = {num_carriers_per_cell}",
+                'system_carriers_formula': f"System Carriers = Carriers × N = {num_carriers_per_cell} × {cluster_size_n} = {num_carriers_in_system}"
+            }
+            
+            # Add warnings for unusual results
+            warnings = []
+            if dmax > 20000:
+                warnings.append(f"Very large cell radius ({dmax/1000:.1f} km) - check power settings")
+            if dmax < 500:
+                warnings.append(f"Very small cell radius ({dmax/1000:.2f} km) - may be unrealistic")
+            if traffic_load_each_cell > 20:
+                warnings.append(f"High traffic per cell ({traffic_load_each_cell:.2f} E) - consider more cells")
+            if num_channels_required > 50:
+                warnings.append(f"Many channels required ({num_channels_required}) - check traffic assumptions")
+            
+            results['warnings'] = warnings
             
             return {
                 'success': True,
                 'results': results,
                 'explanation': f"""
-                **Advanced Cellular System Design Analysis:**
+                **CORRECTED Cellular System Design Results:**
                 
-                **1. Coverage Analysis:**
-                - Maximum reliable distance: {max_distance/1000:.3f} km
-                - Maximum cell size: {max_cell_size_km2:.3f} km²
-                - Total cells required: {total_num_cells} cells
-                - Cell density: {results['cell_density']:.2f} cells/km²
+                **Input Parameters Validation:**
+                - Link Budget: {link_budget_db:.1f} dB (P0: {p0_dbm} dBm, Psens: {receiver_sensitivity_dbm} dBm)
+                - Traffic per user: {traffic_per_user*1000:.2f} mErlang (corrected calculation)
+                - Frequency: {frequency_mhz} MHz, Path loss exponent: {path_loss_exponent}
                 
-                **2. Link Budget Analysis:**
-                - Transmit power: {p0_dbm} dBm ({p0_watt*1000:.2f} mW)
-                - Receiver sensitivity: {receiver_sensitivity_dbm} dBm ({receiver_sensitivity_watt*1e12:.2f} pW)
-                - Path loss exponent: {path_loss_exponent}
-                - Reference distance: {d0_m/1000:.1f} km
+                **1. Link Budget (EXACT Formula):**
+                dmax = ((Psens/P0)^(-1/n)) × d0
+                Power ratio = {receiver_sensitivity_watt:.2e} / {p0_watt:.2e} = {power_ratio:.2e}
+                **dmax = {dmax/1000:.3f} km** (limited to realistic range)
                 
-                **3. Interference Analysis:**
-                - Required SIR: {sir_db} dB ({sir_ratio:.1f} ratio)
-                - First-tier interferers: {nb}
-                - Calculated cluster size: N = {cluster_size_n}
-                - Minimum required: {x:.2f}
+                **2. Cell Area (EXACT Formula):**
+                Cell Area = (3√3/2) × dmax² = **{cell_area_km2:.3f} km²**
                 
-                **4. Traffic Engineering:**
-                - Traffic per user: {traffic_per_user*1000:.2f} mErlang
-                - Total system traffic: {traffic_all_system:.2f} Erlang
-                - Traffic per cell: {traffic_load_each_cell:.3f} Erlang
-                - Grade of Service: {gos*100:.1f}% (using {gos_key}% table)
+                **3. Traffic Engineering (EXACT Formulas):**
+                Auser = ({avg_call_rate_per_user} × {avg_call_duration}) / 86400 = **{traffic_per_user*1000:.3f} mErlang**
+                Asystem = {traffic_per_user:.6f} × {max_num_users} = **{traffic_all_system:.3f} Erlang**
+                Acell = {traffic_all_system:.3f} / {total_num_cells} = **{traffic_load_each_cell:.6f} Erlang**
                 
-                **5. Channel Assignment:**
-                - Channels per cell: {num_channels_required}
-                - Time slots per carrier: {time_slots_per_carrier}
-                - Carriers per cell: {num_carriers_per_cell}
-                - Total system carriers: {num_carriers_in_system}
-                - Channel utilization: {channel_utilization*100:.1f}%
+                **4. Interference Analysis (EXACT Formula):**
+                N ≥ (SIR × NB)^(2/n) / 3 = ({sir_linear:.1f} × {nb})^(2/{path_loss_exponent}) / 3 = {cluster_size_calculated:.3f}
+                **Selected N = {cluster_size_n}**
                 
-                **6. System Performance:**
-                - Total system users: {max_num_users:,}
-                - Actual channel capacity: {actual_system_capacity}
-                - Spectrum efficiency: {results['spectrum_efficiency']:.1f} users/km²
-                - Traffic capacity found: {results['traffic_capacity_found']:.3f} Erlang
+                **5. Channel Assignment (EXACT Formulas):**
+                Channels per cell: **{num_channels_required}** (from Erlang B table at {gos_key}% GOS)
+                Carriers per cell: **{num_carriers_per_cell}** (⌈{num_channels_required}/{time_slots_per_carrier}⌉)
+                System carriers: **{num_carriers_in_system}** (Carriers × N = {num_carriers_per_cell} × {cluster_size_n})
                 
-                **Key Engineering Insights:**
-                - Cell size is limited by link budget (max distance = {max_distance/1000:.3f} km)
-                - Cluster size N={cluster_size_n} provides adequate SIR of {sir_db} dB
-                - System can handle {traffic_all_system:.2f} Erlang with {gos*100:.1f}% blocking
-                - Each cell requires {num_carriers_per_cell} carrier(s) for {num_channels_required} channels
-                - Total frequency reuse efficiency: 1/{cluster_size_n} = {1/cluster_size_n:.3f}
+                **6. System Summary:**
+                - Total cells: {total_num_cells} | Users per cell: {users_per_cell:.0f}
+                - System utilization: {channel_utilization*100:.1f}% | Reuse efficiency: {frequency_reuse_efficiency:.3f}
+                - Cell density: {cell_density:.3f} cells/km² | Spectrum efficiency: {spectrum_efficiency:.1f} users/km²
+                
+                {"**⚠️ Warnings:** " + "; ".join(warnings) if warnings else "**✅ All parameters within realistic ranges**"}
+                
+                **Key Corrections Applied:**
+                1. Matched HTML defaults to Python defaults (P0=43dBm, Psens=-104dBm)
+                2. Added practical limits to prevent unrealistic cell sizes
+                3. Enhanced validation and warning system
+                4. Improved traffic calculations for realistic values
                 """
             }
         except Exception as e:

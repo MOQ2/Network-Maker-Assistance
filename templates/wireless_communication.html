@@ -26,7 +26,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <label class="form-label">Signal Bandwidth (Hz)</label>
-                                <input type="number" class="form-control" id="signal_bandwidth" value="4000" step="any">
+                                <input type="number" class="form-control" id="signal_bandwidth" value="4000" min="0" step="any">
                                 <small class="form-text text-muted">Maximum frequency component of the input signal</small>
                             </div>
                             <div class="col-md-6">
@@ -204,7 +204,7 @@ document.getElementById('calculationForm').addEventListener('submit', async func
         const result = await response.json();
         
         if (result.success) {
-            displayResults(result.results, result.explanation);
+            displayResults(result.results, result.explanation, 'wireless_communication', formData);
         } else {
             displayError(result.error);
         }

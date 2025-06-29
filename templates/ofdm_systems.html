@@ -193,7 +193,7 @@ document.getElementById('calculationForm').addEventListener('submit', async func
         const result = await response.json();
         
         if (result.success) {
-            displayResults(result.results, result.explanation);
+            displayResults(result.results, result.explanation, 'ofdm_systems', formData);
         } else {
             displayError(result.error);
         }
